@@ -1,0 +1,5 @@
+{
+  "DatabaseURL": "jdbc:mysql://54.37.40.206:3306/my_dating_app",
+  "DatabaseUsername": "root",
+  "DatabasePassword": "Fire@2004"
+}

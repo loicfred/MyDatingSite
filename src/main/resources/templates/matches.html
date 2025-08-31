@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Profile Matches</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .profile-box {
+            width: 20%;
+            height: 250px;
+        }
+        @media screen and (max-width: 480px) {
+            .profile-box {
+                width: 45%;
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div th:replace="/fragments/header :: mainHeader"></div>
+
+<div class="container my-4">
+
+    <h1 class="mb-2">Find Matches</h1>
+    <form method="get" action="/matches" style="display: flex; align-items: center; padding: 5px;">
+        <label for="searchId" class="form-label" style="width: 30%">Select Search Profile</label>
+        <select class="form-select" id="searchId"  name="searchId" style="width: 60%" onchange="this.form.submit()">
+            <option th:value="0" disabled th:selected="${SearchID == 0}">
+                -- Choose a Search Profile --
+            </option>
+            <option th:each="sp : ${searchProfiles}"
+                    th:value="${sp.ID}"
+                    th:text="${sp.Name}"
+                    th:selected="${sp.ID == SearchID}">
+            </option>
+        </select>
+        <a th:href="@{/profile/search}" class="btn btn-danger" style="margin-left: auto;">Add Search</a>
+    </form>
+
+    <div class="row g-4" style="display: flex; flex-wrap: wrap; align-items: center; justify-content: center;">
+        <div class="profile-box" th:each="m : ${matches}">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="profile-images mb-3">
+                        <img th:src="${m.Avatar != null ? '/img/avatar/' + m.ID + '.png' : '/img/default-pfp.png'}"
+                             class="rounded-circle" style="width: 100%; object-fit:cover;" alt="Profile Picture">
+                    </div>
+                    <div th:if="${m.ID != 0}" style="display: flex; align-items: center; justify-content: center;">
+                        <div style="width: 50%">
+                            <h5 class="card-title" th:text="${m.Name}"></h5>
+                            <p class="card-text">
+                                <strong>Age:</strong> <span th:text="${m.Age}"></span><br>
+                                <strong>Gender:</strong> <span th:text="${m.Gender}"></span><br>
+                            </p>
+                        </div>
+                        <h1 style="width: 50%"><strong><span th:text="${'10%'}"></span></strong></h1>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<footer th:replace="/fragments/footer :: mainFooter"></footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
