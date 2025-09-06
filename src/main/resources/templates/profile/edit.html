@@ -47,7 +47,7 @@
                   <div class="mb-3">
                     <label class="form-label fw-semibold">Profile Picture</label>
                     <div class="d-flex align-items-center gap-3">
-                      <img th:src="${user.getProfile().Avatar != null ? '/img/avatar/' + user.ID + '.png' : '/img/default-pfp.png'}"
+                      <img th:src="${user.getProfile().Avatar != null ? '/img/avatar/' + user.Username + '.png' : '/img/default-pfp.png'}"
                            class="rounded-circle border"
                            style="width:100px;height:100px;object-fit:cover;transition: transform .2s;"
                            onmouseover="this.style.transform='scale(1.1)'"
@@ -231,7 +231,7 @@
                   <!-- Smoking -->
                   <div class="mb-3">
                     <label class="form-label fw-semibold">Do you smoke?</label>
-                    <select th:field="*{Smoking}" class="form-select">
+                    <select th:field="*{StatusSmoking}" class="form-select">
                       <option value="">Choose an option</option>
                       <option th:each="opt : ${T(my.dating.app.object.enums.BadHabit).values()}"
                               th:value="${opt}" th:text="${opt.displayName}">
@@ -242,7 +242,7 @@
                   <!-- Drinking -->
                   <div class="mb-3">
                     <label class="form-label fw-semibold">Do you drink alcohol?</label>
-                    <select th:field="*{Drinking}" class="form-select">
+                    <select th:field="*{StatusDrinking}" class="form-select">
                       <option value="">Choose an option</option>
                       <option th:each="opt : ${T(my.dating.app.object.enums.BadHabit).values()}"
                               th:value="${opt}" th:text="${opt.displayName}">
@@ -253,7 +253,7 @@
                   <!-- Exercise -->
                   <div class="mb-3">
                     <label class="form-label fw-semibold">Do you exercise?</label>
-                    <select th:field="*{Exercise}" class="form-select">
+                    <select th:field="*{StatusExercise}" class="form-select">
                       <option value="">Choose an option</option>
                       <option th:each="opt : ${T(my.dating.app.object.enums.BadHabit).values()}"
                               th:value="${opt}" th:text="${opt.displayName}">
@@ -296,7 +296,7 @@
 
                   <!-- Virginity -->
                   <div class="mb-3">
-                    <input type="checkbox" th:field="*{Virgin}"/> Do you still a virgin?
+                    <input type="checkbox" th:field="*{isVirgin}"/> Do you still a virgin?
                   </div>
 
                   <!-- Marriage -->
@@ -306,7 +306,7 @@
 
                   <!-- Mariage + -->
                   <div class="mb-3">
-                    <input type="checkbox" th:field="*{ReligionMatter}" /> If yes, must your partner be of same religion as you?
+                    <input type="checkbox" th:field="*{DoesReligionMatter}" /> If yes, must your partner be of same religion as you?
                   </div>
 
                   <!-- Children -->

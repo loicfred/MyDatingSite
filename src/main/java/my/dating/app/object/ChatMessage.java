@@ -11,12 +11,13 @@ import static my.dating.app.MyDatingSiteApplication.DBM;
 
 public class ChatMessage implements DBSaver<ChatMessage> {
     public final transient DatabaseEditor<ChatMessage> DBE = new DatabaseEditor<>(DBM,this, ChatMessage.class);
-    private transient User U;
 
-    public long ID;
+    public long ID = Instant.now().toEpochMilli();
     public long ChatID;
     public long UserID;
     public String Message;
+    public boolean Edited = false;
+    public Long UpdatedAtTime;
 
     public ChatMessage() {}
     public ChatMessage(long chatid, User user, String message) throws SQLException {
@@ -27,18 +28,11 @@ public class ChatMessage implements DBSaver<ChatMessage> {
         SaveElseWrite();
     }
 
-    public User getUser() {
-        return U == null ? U = User.getById(UserID) : U;
-    }
-
     public static ChatMessage getById(long id) {
         return DBM.retrieveItems(ChatMessage.class).where("ID = ?", id).mapFirstTo(ChatMessage.class);
     }
-    public static List<ChatMessage> getByChat(long chatid) {
-        return DBM.retrieveItems(ChatMessage.class).where("ChatID = ?", chatid).mapAllTo(ChatMessage.class);
-    }
-    public static ChatMessage getByUser(long userid) {
-        return DBM.retrieveItems(ChatMessage.class).where("UserID = ?", userid).mapFirstTo(ChatMessage.class);
+    public static List<ChatMessage> getByChat(long chatid, String... select) {
+        return DBM.retrieveItems(ChatMessage.class).select(select).where("ChatID = ?", chatid).mapAllTo(ChatMessage.class);
     }
 
     public long getID() {
@@ -53,8 +47,21 @@ public class ChatMessage implements DBSaver<ChatMessage> {
     public String getMessage() {
         return Message;
     }
+    public boolean isEdited() {
+        return Edited;
+    }
+
+    public void setUserID(long userid) {
+        UserID = DBE.AddSet("UserID", userid);
+    }
     public void setMessage(String message) {
         if (!message.isEmpty()) Message = DBE.AddSet("Message", message);
+    }
+    public void setEdited(boolean edited) {
+        Edited = DBE.AddSet("Edited", edited);
+    }
+    public void setUpdatedAtTime(Long time) {
+        UpdatedAtTime = DBE.AddSet("UpdatedAtTime", time);
     }
 
     @Override

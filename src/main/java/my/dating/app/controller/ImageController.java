@@ -1,15 +1,16 @@
 package my.dating.app.controller;
 
+import my.dating.app.object.Profile;
 import my.dating.app.object.Profile_Photo;
 import my.dating.app.object.User;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.net.URI;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/img")
@@ -17,13 +18,18 @@ public class ImageController {
 
 
     // Profile picture
-    @GetMapping("/avatar/{id}.png")
-    public ResponseEntity<byte[]> getProfilePic(@PathVariable Long id) throws Exception {
-        User user = User.getById(id);
-        if (user.getProfile().Avatar == null) return ResponseEntity.notFound().build();
+    @GetMapping("/avatar/{username}.png")
+    public ResponseEntity<byte[]> getProfilePic(@PathVariable String username) {
+        Profile.Profile_View user = Profile.Profile_View.get(username);
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.IMAGE_PNG);
-        return new ResponseEntity<>(user.getProfile().Avatar, headers, HttpStatus.OK);
+        if (user.Avatar == null) {
+            headers.setLocation(URI.create("/img/default-pfp.png"));
+            return new ResponseEntity<>(headers, HttpStatus.FOUND);
+        } else {
+            headers.setContentType(MediaType.IMAGE_PNG);
+            headers.setCacheControl(CacheControl.maxAge(1, TimeUnit.HOURS).cachePublic());
+            return new ResponseEntity<>(user.Avatar, headers, HttpStatus.FOUND);
+        }
     }
 
     // Banner image

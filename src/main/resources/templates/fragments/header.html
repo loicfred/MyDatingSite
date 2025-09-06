@@ -1,5 +1,5 @@
-<header th:fragment="mainHeader">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-danger">
+<header th:fragment="mainHeader" style="height: 8vh">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-danger" style="z-index: 1;">
         <div class="container">
             <a class="navbar-brand fw-bold" href="/home">Dating App</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
@@ -9,20 +9,23 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="/matches">Matching</a></li>
                     <li class="nav-item"><a class="nav-link" href="/about">About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/matches">Matches</a></li>
+                    <li class="nav-item" th:if="${principal != null}"><a class="nav-link" href="/chat">Chats</a></li>
 
-                    <li class="nav-item" th:if="${isAnonymous}">
+                    <li class="nav-item" th:if="${principal == null}">
                         <a class="nav-link" href="/accounts/login">Login</a>
                     </li>
-                    <li class="nav-item" th:if="${isAnonymous}">
+                    <li class="nav-item" th:if="${principal == null}">
                         <a class="btn btn-light text-danger ms-2" href="/accounts/signup">Sign Up</a>
                     </li>
 
-                    <li class="nav-item dropdown" th:if="${!isAnonymous}">
+                    <li class="nav-item dropdown" th:if="${principal != null}">
                         <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                           style="display: flex; gap: 5px; border: 1px solid white; border-radius: 5px; align-items: center;"
                            data-bs-toggle="dropdown" aria-expanded="false">
-                            <span th:text="${#authentication.name}">Username</span>
+                            <img th:src="${'/img/avatar/' + #authentication.name + '.png'}" Width="24px" Height="24px" Style="border-radius: 50%" />
+                            <p style=" margin: 0;" th:text="${#authentication.name}"></p>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                             <li><a class="dropdown-item" th:href="${'/profile/' + #authentication.name}">Profile</a></li>

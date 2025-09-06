@@ -11,78 +11,376 @@
             display: flex;
             flex-direction: column;
         }
+
+        .mainpanel {
+            display: flex;
+            height: 92vh;
+        }
+
+
+        .leftpane {
+            width: 25%;
+            height: 100%;
+            background-color: #DDDDDD;
+            border-right: 1px solid #dee2e6;
+        }
+        .chat-item {
+            cursor: pointer;
+            margin: 5px;
+        }
+        .selectedChat {
+            border-radius: 10px;
+            background-color: #FFFFFF;
+        }
+
+
+
+        .rightpane {
+            width: 75%;
+            height: 100%;
+        }
+        .chat-header {height: 6vh;}
+        .chat-header h5 {margin: 0 0 0 10px;}
         .chat-container {
             flex: 1;
-            overflow-y: auto;
+            overflow-y: scroll;
             padding: 1rem;
-            background-color: #f8f9fa;
+            background-color: #FFFFFF;
+            height: 78vh;
         }
+        .chat-footer {
+            height: 8vh; background: #00000011;
+        }
+
+
+
         .message {
-            max-width: 70%;
+            max-width: 80%;
+            margin-bottom: 5px;
+            border-radius: 10px;
+            border: 1px solid #00000033;
         }
         .message.self {
+            background-color: #BBDDFF;
             margin-left: auto;
+            border-top-right-radius: 0;
         }
         .message.other {
+            background-color: #FFBBBB;
             margin-right: auto;
+            border-top-left-radius: 0;
+        }
+
+        .enablemobile {
+            display: none;
+        }
+        .disablemobile {
+            display: block;
+        }
+
+        @media screen and (max-width: 480px) {
+            .mainpanel {
+                flex-direction: column;
+                height: 92vh;
+            }
+            .leftpane {
+                width: 100%;
+            }
+            .rightpane {
+                width: 100%;
+            }
+            .chat-container {
+                height: 78vh;
+            }
+
+            .enablemobile {
+                display: block;
+            }
+            .disablemobile {
+                display: none;
+            }
+
+            footer {
+                display: none;
+            }
         }
     </style>
+    <style th:text="'.message.self {background-color: ' + ${Me.Gender == 'Male' ? '#BBDDFF' : (Me.Gender == 'Female' ? '#FFBBBB' : '#EEEE99')} + ';}'"></style>
+    <style th:text="'.message.other {background-color: ' + ${Me.Gender == 'Male' ? '#FFBBBB' : (Me.Gender == 'Female' ? '#BBDDFF' : '#EEEE99')} + ';}'"></style>
 </head>
 <body>
-
 <header th:replace="/fragments/header :: mainHeader"></header>
 
-<div style="display: flex; max-height: 80vh">
-    <div style="width: 40%;">
-
-    </div>
-    <div style="width: 60%;">
-        <header class="d-flex align-items-center p-2 border-bottom bg-light">
-            <a th:href="@{/profile/{id}(id=${Partner.Username})}">
-                <img th:src="${Partner.getProfile().Avatar != null ? '/img/avatar/' + Partner.ID + '.png' : '/img/default-pfp.png'}" alt="Profile Pic"
-                     class="rounded-circle me-2" width="40" height="40">
-            </a>
-            <a th:href="@{/profile/{id}(id=${Partner.Username})}"
-               class="fw-bold text-dark text-decoration-none"
-               th:text="${Partner.getProfile().Name}">Chat Partner</a>
-        </header>
-
-        <!-- Chat messages -->
-        <div id="chat-messages" class="chat-container">
-            <div th:each="msg : ${messages}">
-                <div th:classappend="${msg.UserID == Me.ID} ? 'self' : 'other'" class="message mb-3">
-                    <div class="card">
-                        <div class="card-body">
-                            <p class="mb-1" th:text="${msg.message}">Message text</p>
-                            <small class="text-muted" th:text="${#dates.format(msg.ID, 'dd/MM/yyyy HH:mm')}">12:00</small>
-                        </div>
-                        <div th:if="${msg.UserID == Me.ID}" class="card-footer bg-transparent p-1 d-flex justify-content-end">
-                            <form th:action="@{/chat/{username}/message/{msgId}/edit(username=${Partner.Username}, msgId=${msg.ID})}"
-                                  method="post" class="me-2">
-                                <input type="hidden" name="content" value="">
-                                <button type="submit" class="btn btn-sm btn-outline-primary">Edit</button>
-                            </form>
-                            <form th:action="@{/chat/{username}/message/{msgId}/delete(username=${Partner.Username}, msgId=${msg.ID})}"
-                                  method="post">
-                                <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<div class="mainpanel">
+    <div class="leftpane disablemobile">
+        <div class="chat-header d-flex align-items-center p-2 border-bottom bg-light">
+            <h5><b>Chats</b></h5>
         </div>
 
-        <!-- Footer -->
-        <footer class="p-2 border-top bg-light">
-            <form th:action="@{/chat/{username}/send(username=${Partner.Username})}" method="post" class="d-flex w-100">
-                <input type="text" name="content" class="form-control" placeholder="Type a message..." required>
+        <div th:each="chat : ${latestChats}" class="chat-item d-flex align-items-center p-2 border-bottom"
+             th:data-chat-id="${chat.ID}" onclick="selectChat(this)">
+
+            <div class="flex-shrink-0 me-2">
+                <img th:src="${'/img/avatar/' + chat.Username + '.png'}"
+                     alt="Avatar" class="rounded-circle" width="40" height="40">
+            </div>
+
+            <div class="flex-grow-1">
+                <div class="fw-bold" th:text="${chat.Name}">Partner Name</div>
+                <div class="text-muted small text-truncate" th:text="${chat.Content != null ? chat.Content : ''}">Last message content</div>
+            </div>
+
+            <div class="flex-shrink-0 text-muted small ms-2" th:text="${chat.LatestMessageID != null ? #dates.format(chat.LatestMessageID, 'HH:mm') : ''}">12:30</div>
+        </div>
+    </div>
+    <div class="rightpane">
+        <div class="chat-header d-flex align-items-center p-2 border-bottom bg-light">
+            <!-- Chat header -->
+        </div>
+
+        <div id="chat-container" class="chat-container">
+            <!-- Chat messages -->
+        </div>
+        <div id="messageMenu" class="d-none position-absolute bg-white border rounded shadow p-1">
+            <button id="editBtn" class="btn btn-sm w-100 mb-1">Edit</button>
+            <button id="deleteBtn" class="btn btn-sm w-100">Delete</button>
+        </div>
+
+        <div class="chat-footer p-2 border-top">
+            <!-- Footer -->
+            <form id="sendForm" class="d-flex w-100">
+                <input type="text" id="messageSend" name="content" class="form-control" maxlength="1024" placeholder="Type a message..." required>
                 <button type="submit" class="btn btn-primary ms-2">Send</button>
             </form>
-        </footer>
+        </d>
+    </div>
     </div>
 </div>
 
 <footer th:replace="/fragments/footer :: mainFooter"></footer>
-
 </body>
+
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.2/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+<script th:inline="javascript">
+    let currentChatId;
+    let menu = document.getElementById('messageMenu');
+    let chatContainer = document.getElementById('chat-container');
+    let messageTextField = document.getElementById('messageSend');
+    let leftpane = document.querySelector('.leftpane');
+    let rightpane = document.querySelector('.rightpane');
+    let stompClient = Stomp.over(new SockJS('/ws-chat'));
+
+    // Select a chat.
+    function selectChat(chatDiv) {
+        if (!chatDiv) return;
+        const chatId = chatDiv.dataset.chatId;
+        leftpane.classList.add('disablemobile');
+        rightpane.classList.remove('disablemobile');
+        if (chatId === currentChatId) return;
+        fetch(`/chat/user/${chatId}`)
+            .then(res => res.json())
+            .then(data => {
+                const { messages, partner } = data;
+
+                const chatContainer = document.getElementById('chat-container');
+                chatContainer.innerHTML = '';
+                messages.forEach(msg => addMessageToChat(msg, [[${Me.ID}]]));
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+
+                messageTextField.value = '';
+                currentChatId = chatId;
+                document.querySelectorAll('.chat-item').forEach(item => item.classList.remove('selectedChat'));
+                chatDiv.classList.add('selectedChat');
+
+                const header = document.querySelector('.rightpane > div:first-child');
+                header.innerHTML = `
+                  <a href="/profile/${partner.Username}">
+                    <img src="/img/avatar/${partner.Username}.png" alt="Profile Pic" class="rounded-circle me-2" width="30" height="30">
+                  </a>
+                  <a href="/profile/${partner.Username}" class="fw-bold text-dark text-decoration-none">
+                     ${partner.Name}
+                  </a>
+                  <button class="enablemobile btn btn-sm ms-auto text-muted" onclick="backToChatlist()"><h1 style="margin: 0"><</h1></button>
+                `;
+            });
+
+    }
+    // Load first chat.
+    selectChat(document.querySelector('.chat-item'));
+
+    stompClient.connect({}, function(frame) {
+        console.log('Connected: ' + frame);
+
+        // Receives a message from the server
+        stompClient.subscribe('/user/queue/receive', function(messageOutput) {
+            let message = JSON.parse(messageOutput.body);
+            addMessageToChat(message, [[${Me.ID}]]);
+        });
+
+        // Receives a message update from the server
+        stompClient.subscribe('/user/queue/update', function(messageOutput) {
+            let msg = JSON.parse(messageOutput.body);
+            let msgDiv = chatContainer.querySelector(`[data-message-id='${msg.ID}']`);
+            if (msgDiv) {
+                let p = msgDiv.querySelector('p');
+                p.textContent = msg.Message;
+                if (msg.Edited) {
+                    let editedSpan = document.createElement('span');
+                    editedSpan.classList.add('text-muted', 'ms-1');
+                    editedSpan.style.fontSize = '0.8em';
+                    editedSpan.textContent = '(edited)';
+                    p.appendChild(editedSpan);
+                }
+            }
+        });
+
+        // Receives a message delete from the server
+        stompClient.subscribe('/user/queue/delete', function(messageOutput) {
+            let messageId = JSON.parse(messageOutput.body);
+            let msgDiv = chatContainer.querySelector(`[data-message-id='${messageId}']`);
+            if (msgDiv) msgDiv.remove();
+        });
+
+    });
+
+    // Send a message
+    document.getElementById('sendForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        let content = messageTextField.value;
+        messageTextField.value = '';
+        stompClient.send("/app/send", {}, JSON.stringify({
+            ChatID: currentChatId,
+            Message: content
+        }));
+    });
+
+    function editMessage(msg) {
+        let newContent = prompt("Edit your message:", msg.Message);
+        if (!newContent) return;
+
+        stompClient.send("/app/edit", {}, JSON.stringify({
+            ID: msg.ID,
+            Message: newContent
+        }));
+    }
+    function deleteMessage(msg) {
+        if (!confirm("Delete this message?")) return;
+
+        stompClient.send("/app/delete", {}, JSON.stringify({
+            ID: msg.ID
+        }));
+    }
+    function addMessageToChat(msg, meId) {
+        let div = document.createElement('div');
+        div.classList.add('message');
+        div.dataset.messageId = msg.ID;
+        div.classList.add(msg.UserID === meId ? 'self' : 'other');
+        div.style.width = 'fit-content';
+
+        let card = document.createElement('div');
+
+        let cardBody = document.createElement('div');
+        cardBody.classList.add('card-body', 'position-relative', 'p-2', 'd-flex');
+        cardBody.style.flexDirection = 'column';
+
+        let p = document.createElement('p');
+        p.classList.add('mb-0');
+        p.style.marginRight = '20px';
+        p.textContent = msg.Message;
+
+        if (msg.Edited) {
+            let editedSpan = document.createElement('span');
+            editedSpan.classList.add('text-muted', 'ms-1');
+            editedSpan.style.fontSize = '0.75em';
+            editedSpan.textContent = '(edited)';
+            p.appendChild(editedSpan);
+        }
+
+        let small = document.createElement('small');
+        small.classList.add('text-muted');
+        small.style.fontSize = '0.75em';
+        small.style.marginRight = '5px';
+        small.style.marginLeft = 'auto';
+        small.textContent = formatChatDate(msg.ID);
+
+        cardBody.appendChild(p);
+        cardBody.appendChild(small);
+
+        if (msg.UserID === meId) {
+            let menuBtn = document.createElement('button');
+            menuBtn.classList.add('btn', 'btn-sm', 'position-absolute');
+            menuBtn.style.top = '5px';
+            menuBtn.style.right = '5px';
+            menuBtn.textContent = '⋮';
+
+            menuBtn.onclick = (event) => {
+                event.stopPropagation();
+
+                // Set the menu position to where the button is clicked
+                menu.style.top = `${event.pageY - 80}px`;
+                menu.style.left = `${event.pageX - 115}px`;
+                menu.classList.remove('d-none');
+
+                // Attach actions dynamically
+                document.getElementById('editBtn').onclick = () => {
+                    editMessage(msg);
+                    menu.classList.add('d-none');
+                };
+
+                document.getElementById('deleteBtn').onclick = () => {
+                    deleteMessage(msg);
+                    menu.classList.add('d-none');
+                };
+            };
+
+            cardBody.appendChild(menuBtn);
+        }
+
+        card.appendChild(cardBody);
+        div.appendChild(card);
+        chatContainer.appendChild(div);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+    document.addEventListener('click', function(e) {
+        menu.classList.add('d-none');
+    })
+
+    function backToChatlist() {
+        if (leftpane.classList.contains('disablemobile')) {
+            leftpane.classList.remove('disablemobile');
+            rightpane.classList.add('disablemobile');
+        }
+    }
+
+    function formatChatDate(timestamp) {
+        let date = new Date(timestamp);
+        let now = new Date();
+        let today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        let yesterday = new Date(today);
+        yesterday.setDate(today.getDate() - 1);
+        let messageDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        if (messageDay.getTime() === today.getTime()) {
+            return date.toLocaleTimeString('en-GB', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        } else if (messageDay.getTime() === yesterday.getTime()) {
+            return "Yesterday " + date.toLocaleTimeString('en-GB', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        } else {
+            return date.toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            }) + " " + date.toLocaleTimeString('en-GB', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+    }
+</script>
+
 </html>

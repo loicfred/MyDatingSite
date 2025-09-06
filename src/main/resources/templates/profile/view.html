@@ -71,14 +71,14 @@
 <header th:replace="/fragments/header :: mainHeader"></header>
 
 <div class="container mt-2" style="position: relative; display: flex; align-items: center;">
-    <img th:src="${user.getProfile().Avatar != null ? '/img/avatar/' + user.ID + '.png' : '/img/default-pfp.png'}"
+    <img th:src="${user.getProfile().Avatar != null ? '/img/avatar/' + user.Username + '.png' : '/img/default-pfp.png'}"
          class="pfp rounded-circle" style="width:150px;height:150px;object-fit:cover;" alt="Profile Picture">
 
     <div style="display: block; margin-top: 80px; width: 100%; background: #00000011; border-top-left-radius: 2%; border-top-right-radius: 2%; padding: 10px;">
         <div style="display: block; margin-left: 200px;">
             <div style="display: flex; align-items: center; justify-content: center; gap: 15px;">
                 <h3 th:text="${'@' + user.getProfile().Name}">Username Profile</h3>
-                <a th:if="${isOwner}" th:href="@{/profile/edit}" class="btn btn-danger" style="margin-left: auto; margin-right: 10px">Edit Profile</a>
+                <a th:if="${isOwner}" th:href="@{/profile/edit}" class="btn btn-danger ms-auto" style="margin-right: 10px">Edit Profile</a>
             </div>
             <div style="display: flex; align-items: center; gap: 15px;">
                 <h6 th:text="${'Gender: ' + user.getProfile().Gender}"></h6>
