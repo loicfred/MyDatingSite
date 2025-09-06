@@ -16,8 +16,9 @@ public class ChatMessage implements DBSaver<ChatMessage> {
     public long ChatID;
     public long UserID;
     public String Message;
-    public boolean Edited = false;
     public Long UpdatedAtTime;
+    public boolean isEdited = false;
+    public boolean isRead = false;
 
     public ChatMessage() {}
     public ChatMessage(long chatid, User user, String message) throws SQLException {
@@ -48,7 +49,10 @@ public class ChatMessage implements DBSaver<ChatMessage> {
         return Message;
     }
     public boolean isEdited() {
-        return Edited;
+        return isEdited;
+    }
+    public boolean isRead() {
+        return isRead;
     }
 
     public void setUserID(long userid) {
@@ -58,7 +62,10 @@ public class ChatMessage implements DBSaver<ChatMessage> {
         if (!message.isEmpty()) Message = DBE.AddSet("Message", message);
     }
     public void setEdited(boolean edited) {
-        Edited = DBE.AddSet("Edited", edited);
+        isEdited = DBE.AddSet("isEdited", edited);
+    }
+    public void setRead(boolean edited) {
+        isRead = DBE.AddSet("isRead", edited);
     }
     public void setUpdatedAtTime(Long time) {
         UpdatedAtTime = DBE.AddSet("UpdatedAtTime", time);

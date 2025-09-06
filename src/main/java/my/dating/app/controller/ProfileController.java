@@ -21,9 +21,7 @@ public class ProfileController {
         User user = User.getByUsername(username);
         while (user.getProfile().getPhotos().size() < 20) user.getProfile().getPhotos().add(new Profile_Photo());
         model.addAttribute("user", user);
-
-        boolean isOwner = loggedUser != null && loggedUser.getName().equals(user.getUsername());
-        model.addAttribute("isOwner", isOwner);
+        model.addAttribute("isOwner", loggedUser != null && loggedUser.getName().equals(user.getUsername()));
         return "profile/view";
     }
 

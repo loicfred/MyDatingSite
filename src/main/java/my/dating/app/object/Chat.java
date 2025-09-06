@@ -2,6 +2,7 @@ package my.dating.app.object;
 
 import my.utilities.db.DBSaver;
 import my.utilities.db.DatabaseEditor;
+import my.utilities.db.QueryParameter;
 
 import java.sql.SQLException;
 import java.time.Instant;
@@ -32,6 +33,10 @@ public class Chat implements DBSaver<Chat> {
         return Messages == null ? Messages = ChatMessage.getByChat(ID, select) : Messages;
     }
 
+    public void readAllMessages(long userid) {
+        DBM.updateItems(ChatMessage.class).set(new QueryParameter("isRead", true)).where("ChatID = ? AND UserID = ?", ID, userid).update();
+    }
+
     @Override
     public Chat Save() throws SQLException {
         DBE.Save("ID = ?", ID); return this;
@@ -53,53 +58,59 @@ public class Chat implements DBSaver<Chat> {
         public Long SenderID;
         public String Content;
 
-        public Long UserID;
-        public String Username;
-        public String Name;
+        public Long PartnerID;
+        public String PartnerUsername;
+        public String PartnerName;
+
+        public Long Unreads;
 
         public static List<Latest_Chat> getWithUser(long userid) {
-            return DBM.retrieveItems(Latest_Chat.class).where("(UserID1 = ? OR UserID2 = ?) AND NOT UserID = ?", userid, userid, userid).mapAllTo(Latest_Chat.class);
+            return DBM.retrieveItems(Latest_Chat.class).where("(UserID1 = ? OR UserID2 = ?) AND NOT PartnerID = ?", userid, userid, userid).mapAllTo(Latest_Chat.class);
         }
         public static Latest_Chat find(long chatid, String username) {
-            return DBM.retrieveItems(Latest_Chat.class).where("ID = ? AND NOT Username = ?", chatid, username).mapFirstTo(Latest_Chat.class);
+            return DBM.retrieveItems(Latest_Chat.class).where("ID = ? AND NOT PartnerUsername = ?", chatid, username).mapFirstTo(Latest_Chat.class);
         }
 
         public Long getLatestMessageID() {
             return LatestMessageID;
         }
-        public void setLatestMessageID(Long latestMessageID) {
-            LatestMessageID = latestMessageID;
-        }
         public Long getSenderID() {
             return SenderID;
-        }
-        public void setSenderID(Long senderID) {
-            SenderID = senderID;
-        }
-        public void setUserID(Long userID) {
-            UserID = userID;
         }
         public String getContent() {
             return Content;
         }
+        public String getPartnerUsername() {
+            return PartnerUsername;
+        }
+        public String getPartnerName() {
+            return PartnerName;
+        }
+        public Long getPartnerID() {
+            return PartnerID;
+        }
+        public Long getUnreads() {
+            return Unreads;
+        }
 
+        public void setLatestMessageID(Long latestMessageID) {
+            LatestMessageID = latestMessageID;
+        }
+        public void setSenderID(Long senderID) {
+            SenderID = senderID;
+        }
         public void setContent(String content) {
             Content = content;
         }
-        public String getUsername() {
-            return Username;
+        public void setPartnerUsername(String username) {
+            PartnerUsername = username;
         }
-        public void setUsername(String username) {
-            Username = username;
+        public void setPartnerName(String name) {
+            PartnerName = name;
         }
-        public String getName() {
-            return Name;
+        public void setUnreads(Long unreads) {
+            Unreads = unreads;
         }
-        public Long getUserID() {
-            return UserID;
-        }
-        public void setName(String name) {
-            Name = name;
-        }
+
     }
 }

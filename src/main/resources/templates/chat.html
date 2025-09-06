@@ -19,10 +19,9 @@
 
 
         .leftpane {
-            width: 25%;
+            width: 30%;
             height: 100%;
             background-color: #DDDDDD;
-            border-right: 1px solid #dee2e6;
         }
         .chat-item {
             cursor: pointer;
@@ -35,8 +34,12 @@
 
 
 
+        #divider {
+            width: 3px; cursor: col-resize; background: #dee2e6;;
+        }
+
         .rightpane {
-            width: 75%;
+            width: 70%;
             height: 100%;
         }
         .chat-header {height: 6vh;}
@@ -77,6 +80,16 @@
         .disablemobile {
             display: block;
         }
+        .notification-badge {
+            background: #ff5454;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            border-radius: 50%;
+            width: 20px; height: 20px;
+            text-align: center;
+            justify-content: center;
+        }
 
         @media screen and (max-width: 480px) {
             .mainpanel {
@@ -93,6 +106,10 @@
                 height: 78vh;
             }
 
+            #divider {
+                display: none;
+            }
+
             .enablemobile {
                 display: block;
             }
@@ -103,6 +120,28 @@
             footer {
                 display: none;
             }
+        }
+    </style>
+    <style>
+        #typing {
+            background-color: #00000011; border-radius: 16px; padding: 10px; margin: 5px; font-size: 16px;
+        }
+        .dot {
+            height: 10px;
+            width: 10px;
+            margin: 0 2px;
+            background-color: #444;
+            border-radius: 50%;
+            display: inline-block;
+            animation: bounce 2.0s infinite;
+        }
+        .dot:nth-child(1) { animation-delay: 0.2s; }
+        .dot:nth-child(2) { animation-delay: 0.4s; }
+        .dot:nth-child(3) { animation-delay: 0.6s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
         }
     </style>
     <style th:text="'.message.self {background-color: ' + ${Me.Gender == 'Male' ? '#BBDDFF' : (Me.Gender == 'Female' ? '#FFBBBB' : '#EEEE99')} + ';}'"></style>
@@ -116,34 +155,47 @@
         <div class="chat-header d-flex align-items-center p-2 border-bottom bg-light">
             <h5><b>Chats</b></h5>
         </div>
+        <div id="chatlist">
+            <div th:each="chat : ${latestChats}" class="chat-item d-flex align-items-center p-2 border-bottom"
+                 th:data-chat-id="${chat.ID}" onclick="selectChat(this)">
 
-        <div th:each="chat : ${latestChats}" class="chat-item d-flex align-items-center p-2 border-bottom"
-             th:data-chat-id="${chat.ID}" onclick="selectChat(this)">
+                <div class="flex-shrink-0 me-2">
+                    <img th:src="${'/img/avatar/' + chat.PartnerUsername + '.png'}"
+                         alt="Avatar" class="rounded-circle" width="40" height="40">
+                </div>
 
-            <div class="flex-shrink-0 me-2">
-                <img th:src="${'/img/avatar/' + chat.Username + '.png'}"
-                     alt="Avatar" class="rounded-circle" width="40" height="40">
+                <div class="flex-grow-1 w-50">
+                    <div class="d-flex align-items-center">
+                        <div class="fw-bold" th:text="${chat.PartnerName}">Partner Name</div>
+                        <div class="chat-item-date flex-shrink-0 text-muted small ms-auto" th:text="${chat.LatestMessageID != null ? #dates.format(chat.LatestMessageID, 'HH:mm') : ''}">12:30</div>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <div class="chat-item-content text-muted small text-truncate" th:text="${chat.Content != null ? chat.Content : ''}">Last message content</div>
+                        <div class="notification-badge ms-auto" th:style="'display: ' + ${chat.Unreads > 0 ? 'block' : 'none'} + ';'" th:text="${chat.Unreads}">1</div>
+                    </div>
+                </div>
             </div>
-
-            <div class="flex-grow-1">
-                <div class="fw-bold" th:text="${chat.Name}">Partner Name</div>
-                <div class="text-muted small text-truncate" th:text="${chat.Content != null ? chat.Content : ''}">Last message content</div>
-            </div>
-
-            <div class="flex-shrink-0 text-muted small ms-2" th:text="${chat.LatestMessageID != null ? #dates.format(chat.LatestMessageID, 'HH:mm') : ''}">12:30</div>
         </div>
     </div>
+    <div id="divider" class="bg-secondary"></div>
     <div class="rightpane">
         <div class="chat-header d-flex align-items-center p-2 border-bottom bg-light">
             <!-- Chat header -->
         </div>
 
-        <div id="chat-container" class="chat-container">
-            <!-- Chat messages -->
-        </div>
-        <div id="messageMenu" class="d-none position-absolute bg-white border rounded shadow p-1">
-            <button id="editBtn" class="btn btn-sm w-100 mb-1">Edit</button>
-            <button id="deleteBtn" class="btn btn-sm w-100">Delete</button>
+        <div class="chat-container">
+            <div id="message-container">
+                <!-- Chat messages -->
+            </div>
+            <div id="typing" style="display:none;">
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+            </div>
+            <div id="messageMenu" class="d-none position-absolute bg-white border rounded shadow p-1">
+                <button id="editBtn" class="btn btn-sm w-100 mb-1">Edit</button>
+                <button id="deleteBtn" class="btn btn-sm w-100">Delete</button>
+            </div>
         </div>
 
         <div class="chat-footer p-2 border-top">
@@ -165,8 +217,9 @@
 <script th:inline="javascript">
     let currentChatId;
     let menu = document.getElementById('messageMenu');
-    let chatContainer = document.getElementById('chat-container');
+    let messagesContainer = document.getElementById('message-container');
     let messageTextField = document.getElementById('messageSend');
+    let isTyping = document.getElementById("typing");
     let leftpane = document.querySelector('.leftpane');
     let rightpane = document.querySelector('.rightpane');
     let stompClient = Stomp.over(new SockJS('/ws-chat'));
@@ -177,16 +230,15 @@
         const chatId = chatDiv.dataset.chatId;
         leftpane.classList.add('disablemobile');
         rightpane.classList.remove('disablemobile');
+        chatDiv.querySelector('.notification-badge').style.display = 'none';
         if (chatId === currentChatId) return;
         fetch(`/chat/user/${chatId}`)
             .then(res => res.json())
             .then(data => {
                 const { messages, partner } = data;
 
-                const chatContainer = document.getElementById('chat-container');
-                chatContainer.innerHTML = '';
-                messages.forEach(msg => addMessageToChat(msg, [[${Me.ID}]]));
-                chatContainer.scrollTop = chatContainer.scrollHeight;
+                messagesContainer.innerHTML = '';
+                messages.forEach(msg => addMessageToChat(msg, /*[[${Me.ID}]]*/));
 
                 messageTextField.value = '';
                 currentChatId = chatId;
@@ -195,13 +247,13 @@
 
                 const header = document.querySelector('.rightpane > div:first-child');
                 header.innerHTML = `
+                  <button class="enablemobile btn btn-sm text-muted" onclick="backToChatlist()"><h1 style="margin: 0">←</h1></button>
                   <a href="/profile/${partner.Username}">
                     <img src="/img/avatar/${partner.Username}.png" alt="Profile Pic" class="rounded-circle me-2" width="30" height="30">
                   </a>
                   <a href="/profile/${partner.Username}" class="fw-bold text-dark text-decoration-none">
                      ${partner.Name}
                   </a>
-                  <button class="enablemobile btn btn-sm ms-auto text-muted" onclick="backToChatlist()"><h1 style="margin: 0"><</h1></button>
                 `;
             });
 
@@ -214,18 +266,19 @@
 
         // Receives a message from the server
         stompClient.subscribe('/user/queue/receive', function(messageOutput) {
+            isTyping.style.display = "none";
             let message = JSON.parse(messageOutput.body);
-            addMessageToChat(message, [[${Me.ID}]]);
+            addMessageToChat(message, /*[[${Me.ID}]]*/);
         });
 
         // Receives a message update from the server
         stompClient.subscribe('/user/queue/update', function(messageOutput) {
             let msg = JSON.parse(messageOutput.body);
-            let msgDiv = chatContainer.querySelector(`[data-message-id='${msg.ID}']`);
+            let msgDiv = messagesContainer.querySelector(`[data-message-id='${msg.ID}']`);
             if (msgDiv) {
                 let p = msgDiv.querySelector('p');
                 p.textContent = msg.Message;
-                if (msg.Edited) {
+                if (msg.isEdited) {
                     let editedSpan = document.createElement('span');
                     editedSpan.classList.add('text-muted', 'ms-1');
                     editedSpan.style.fontSize = '0.8em';
@@ -238,10 +291,35 @@
         // Receives a message delete from the server
         stompClient.subscribe('/user/queue/delete', function(messageOutput) {
             let messageId = JSON.parse(messageOutput.body);
-            let msgDiv = chatContainer.querySelector(`[data-message-id='${messageId}']`);
+            let msgDiv = messagesContainer.querySelector(`[data-message-id='${messageId}']`);
             if (msgDiv) msgDiv.remove();
         });
 
+        // Receives a message notification from the server
+        stompClient.subscribe('/user/queue/notification/send', function(chatOutput) {
+            const chat = JSON.parse(chatOutput.body);
+            const chatItem = document.querySelector(`[data-chat-id="${chat.ID}"]`);
+            displayNotification(chat, chatItem);
+            moveChatToTop(chatItem);
+        });
+        // Receives a message notification from the server
+        stompClient.subscribe('/user/queue/notification/update', function(chatOutput) {
+            const chat = JSON.parse(chatOutput.body);
+            const chatItem = document.querySelector(`[data-chat-id="${chat.ID}"]`);
+            displayNotification(chat, chatItem);
+        });
+
+        // Receives a typing notification from the server.
+        stompClient.subscribe('/user/queue/typing', function() {
+            isTyping.style.display = "inline-block";
+            setTimeout(() => {
+                isTyping.style.display = "none";
+            }, 5000);
+        });
+    });
+
+    messageTextField.addEventListener("input", (event) => {
+        stompClient.send("/app/typing", {}, JSON.stringify(currentChatId));
     });
 
     // Send a message
@@ -289,7 +367,7 @@
         p.style.marginRight = '20px';
         p.textContent = msg.Message;
 
-        if (msg.Edited) {
+        if (msg.isEdited) {
             let editedSpan = document.createElement('span');
             editedSpan.classList.add('text-muted', 'ms-1');
             editedSpan.style.fontSize = '0.75em';
@@ -339,8 +417,17 @@
 
         card.appendChild(cardBody);
         div.appendChild(card);
-        chatContainer.appendChild(div);
-        chatContainer.scrollTop = chatContainer.scrollHeight;
+        messagesContainer.appendChild(div);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+    function displayNotification(chat, chatItem) {
+        chatItem.querySelector('.chat-item-date').textContent = new Date(chat.LatestMessageID).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        chatItem.querySelector('.chat-item-content').textContent = chat.Content;
+        if (chat.Unreads > 0 && chat.ID !== currentChatId) {
+            let badge = chatItem.querySelector('.notification-badge');
+            badge.textContent = chat.Unreads;
+            badge.style.display = 'block';
+        }
     }
     document.addEventListener('click', function(e) {
         menu.classList.add('d-none');
@@ -381,6 +468,32 @@
             });
         }
     }
+    function moveChatToTop(element) {
+        const box = document.getElementById("chatlist");
+        box.prepend(element);
+    }
 </script>
 
+<script>
+    const divider = document.querySelector("#divider");
+    const left = document.querySelector(".leftpane");
+
+    let isResizing = false;
+
+    divider.addEventListener("mousedown", (e) => {
+        isResizing = true;
+        document.body.style.cursor = "col-resize";
+    });
+
+    document.addEventListener("mousemove", (e) => {
+        if (!isResizing) return;
+        let newWidth = Math.min(Math.max(e.clientX, 400), 600);
+        left.style.flex = `0 0 ${newWidth}px`;
+    });
+
+    document.addEventListener("mouseup", () => {
+        isResizing = false;
+        document.body.style.cursor = "default";
+    });
+</script>
 </html>

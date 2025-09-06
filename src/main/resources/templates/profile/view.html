@@ -70,7 +70,7 @@
 
 <header th:replace="/fragments/header :: mainHeader"></header>
 
-<div class="container mt-2" style="position: relative; display: flex; align-items: center;">
+<div class="container mt-2 d-flex align-items-center" style="position: relative;">
     <img th:src="${user.getProfile().Avatar != null ? '/img/avatar/' + user.Username + '.png' : '/img/default-pfp.png'}"
          class="pfp rounded-circle" style="width:150px;height:150px;object-fit:cover;" alt="Profile Picture">
 

@@ -3,6 +3,7 @@ package my.dating.app.controller;
 import my.dating.app.object.Profile;
 import my.dating.app.object.Profile_Photo;
 import my.dating.app.object.User;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,6 +20,7 @@ public class ImageController {
 
     // Profile picture
     @GetMapping("/avatar/{username}.png")
+    @Cacheable(value = "profilePic", key = "#username")
     public ResponseEntity<byte[]> getProfilePic(@PathVariable String username) {
         Profile.Profile_View user = Profile.Profile_View.get(username);
         HttpHeaders headers = new HttpHeaders();
@@ -34,6 +36,7 @@ public class ImageController {
 
     // Banner image
     @GetMapping("/photo/{id}.png")
+    @Cacheable(value = "photos", key = "#id")
     public ResponseEntity<byte[]> getBanner(@PathVariable Long id) {
         Profile_Photo photo = Profile_Photo.getById(id);
         if (photo.Image == null) return ResponseEntity.notFound().build();
