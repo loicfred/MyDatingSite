@@ -26,7 +26,7 @@ public class Email_Verification implements DBSaver<Email_Verification> {
         this.Token = token;
         this.Type = type;
         this.ExpiryDate = Instant.now().plus(24, ChronoUnit.HOURS).toEpochMilli();
-        SaveElseWrite();
+        Write();
     }
 
     public static Email_Verification getById(long id) {
@@ -47,17 +47,17 @@ public class Email_Verification implements DBSaver<Email_Verification> {
     }
 
     @Override
-    public Email_Verification Save() throws SQLException {
-        DBE.Save("ID = ?", ID); return this;
+    public int Update() throws SQLException {
+        return DBE.Update("ID = ?", ID);
     }
 
     @Override
-    public Email_Verification SaveElseWrite() throws SQLException {
-        DBE.SaveElseWrite("ID = ?", ID); return this;
+    public int Delete() throws SQLException {
+        return DBE.Delete("ID = ?", ID);
     }
 
     @Override
-    public Email_Verification Delete() throws SQLException {
-        DBE.Delete("ID = ?", ID); return this;
+    public Email_Verification Write() throws SQLException {
+         return DBE.Write(false, true);
     }
 }

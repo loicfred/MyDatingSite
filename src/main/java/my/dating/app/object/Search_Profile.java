@@ -40,17 +40,17 @@ public class Search_Profile implements DBSaver<Search_Profile> {
     }
 
     @Override
-    public Search_Profile Save() throws SQLException {
-        DBE.Save("ID = ?", ID); return this;
+    public int Update() throws SQLException {
+        return DBE.Update("ID = ?", ID);
     }
 
     @Override
-    public Search_Profile SaveElseWrite() throws SQLException {
-        DBE.SaveElseWrite("ID = ?", ID); return this;
+    public int Delete() throws SQLException {
+        return DBE.Delete("ID = ?", ID);
     }
 
     @Override
-    public Search_Profile Delete() throws SQLException {
-        DBE.Delete("ID = ?", ID); return this;
+    public Search_Profile Write() throws SQLException {
+        return DBE.Write(false, true);
     }
 }

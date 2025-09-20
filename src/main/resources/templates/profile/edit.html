@@ -8,7 +8,6 @@
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <style>
-
     .interest-tag, .language-tag {
       display: inline-block;
       padding: 5px 10px;
@@ -36,6 +35,10 @@
         <form th:action="@{/post/profile/edit}" th:object="${profile}" method="post" enctype="multipart/form-data">
           <input type="hidden" th:field="*{ID}" />
 
+          <div th:if="${profile.NullFields > 0}" class="alert alert-danger">
+             Your profile isn't complete yet. Please complete your profile to start finding partners.
+          </div>
+
           <div class="accordion" id="profileAccordion">
             <div class="accordion-item">
               <h2 class="accordion-header" id="headingPersonal">
@@ -47,7 +50,7 @@
                   <div class="mb-3">
                     <label class="form-label fw-semibold">Profile Picture</label>
                     <div class="d-flex align-items-center gap-3">
-                      <img th:src="${user.getProfile().Avatar != null ? '/img/avatar/' + user.Username + '.png' : '/img/default-pfp.png'}"
+                      <img th:src="${profile.Avatar != null ? '/file/avatar/' + profile.Username + '.png' : '/img/default-pfp.png'}"
                            class="rounded-circle border"
                            style="width:100px;height:100px;object-fit:cover;transition: transform .2s;"
                            onmouseover="this.style.transform='scale(1.1)'"
@@ -59,7 +62,7 @@
                   <!-- Name -->
                   <div class="mb-3">
                     <label class="form-label fw-semibold">Name</label>
-                    <input type="text" th:field="*{Name}" class="form-control" placeholder="What's your name?"></input>
+                    <input type="text" th:field="*{Name}" class="form-control" placeholder="What's your name?">
                   </div>
 
                   <!-- WhoAmI -->
@@ -240,15 +243,15 @@
                   </div>
 
                   <!-- Drinking -->
-                  <div class="mb-3">
-                    <label class="form-label fw-semibold">Do you drink alcohol?</label>
-                    <select th:field="*{StatusDrinking}" class="form-select">
-                      <option value="">Choose an option</option>
-                      <option th:each="opt : ${T(my.dating.app.object.enums.BadHabit).values()}"
-                              th:value="${opt}" th:text="${opt.displayName}">
-                      </option>
-                    </select>
-                  </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Do you drink alcohol?</label>
+                        <select th:field="*{StatusDrinking}" class="form-select">
+                            <option value="">Choose an option</option>
+                            <option th:each="opt : ${T(my.dating.app.object.enums.BadHabit).values()}"
+                                    th:value="${opt}" th:text="${opt.displayName}">
+                            </option>
+                        </select>
+                    </div>
 
                   <!-- Exercise -->
                   <div class="mb-3">
@@ -281,6 +284,32 @@
                 </div>
               </div>
             </div>
+              <div class="accordion-item">
+                  <h2 class="accordion-header" id="headingContact">
+                      <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseContact">Messenging</button>
+                  </h2>
+                  <div id="collapseContact" class="accordion-collapse collapse show" data-bs-parent="#profileAccordion">
+                      <div class="accordion-body">
+
+                          <!-- Rapidity -->
+                          <div class="mb-3">
+                              <input type="checkbox" th:field="*{MessageRead}" /> Do you often leave people on 'read'?
+                          </div>
+
+                          <!-- Rapidity -->
+                          <div class="mb-3">
+                              <label class="form-label fw-semibold">How fast do you answer messages?</label>
+                              <select th:field="*{MessageReplySpeed}" class="form-select">
+                                  <option value="">Choose an option</option>
+                                  <option th:each="opt : ${T(my.dating.app.object.enums.Rapidity).values()}"
+                                          th:value="${opt}" th:text="${opt.displayName}">
+                                  </option>
+                              </select>
+                          </div>
+
+                      </div>
+                  </div>
+              </div>
 
             <div class="accordion-item">
               <h2 class="accordion-header" id="headingFamily">
@@ -296,7 +325,7 @@
 
                   <!-- Virginity -->
                   <div class="mb-3">
-                    <input type="checkbox" th:field="*{isVirgin}"/> Do you still a virgin?
+                    <input type="checkbox" th:field="*{Virgin}"/> Are you a virgin?
                   </div>
 
                   <!-- Marriage -->
@@ -304,9 +333,9 @@
                     <input type="checkbox" th:field="*{WantMarriage}" /> Are you looking for a partner to marry?
                   </div>
 
-                  <!-- Mariage + -->
+                  <!-- Religion matter -->
                   <div class="mb-3">
-                    <input type="checkbox" th:field="*{DoesReligionMatter}" /> If yes, must your partner be of same religion as you?
+                    <input type="checkbox" th:field="*{ReligionMatter}" /> If yes, must your partner be of same religion as you?
                   </div>
 
                   <!-- Children -->

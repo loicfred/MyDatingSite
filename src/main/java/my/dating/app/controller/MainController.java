@@ -1,15 +1,10 @@
 package my.dating.app.controller;
 
 import my.dating.app.object.*;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.security.Principal;
 import java.sql.SQLException;
 import java.util.List;
@@ -31,7 +26,7 @@ public class MainController {
     @GetMapping("/chat")
     public String openChat(Model model, Principal loggedUser) {
         model.addAttribute("principal", loggedUser);
-        Profile.Profile_View currentUser = Profile.Profile_View.get(loggedUser.getName());
+        Profile.Profile_View currentUser = Profile.Profile_View.getView(loggedUser.getName());
         List<Chat.Latest_Chat> latestChats = Chat.Latest_Chat.getWithUser(currentUser.ID);
         model.addAttribute("latestChats", latestChats);
         model.addAttribute("Me", currentUser);
@@ -47,8 +42,8 @@ public class MainController {
         if (searchId == null) searchId = 0L;
         if (page == null) page = 1;
         List<Search_Profile> searchProfiles = Search_Profile.getByUser(user);
-        List<Profile> matches = Profile.search(searchId, page);
-        while (matches.size() < 10) matches.add(new Profile());
+        List<Profile.Profile_View> matches = Profile.Profile_View.search(searchId, page);
+        while (matches.size() < 10) matches.add(new Profile.Profile_View());
         model.addAttribute("SearchID", searchId);
         model.addAttribute("searchProfiles", searchProfiles);
         model.addAttribute("matches", matches);

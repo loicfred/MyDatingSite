@@ -4,34 +4,62 @@ import my.dating.app.object.User;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.stereotype.Service;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
+import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
+import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 
+import javax.sql.DataSource;
 import java.util.Collections;
 
 @Configuration
 public class SecurityConfig {
 
-    private final VerifyUserDetails userDetailsService;
-    public SecurityConfig(VerifyUserDetails userDetailsService) {
-        this.userDetailsService = userDetailsService;
-    }
+    private final DataSource dataSource;
 
+    public SecurityConfig(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+    @Bean
+    public UserDetailsService userDetailsService() throws UsernameNotFoundException {
+        return username -> {
+            User user = User.getByUsername(username);
+            if (user == null) user = User.getByEmail(username);
+            if (user == null) throw new UsernameNotFoundException("User not found");
+            return org.springframework.security.core.userdetails.User.builder()
+                    .username(user.getUsername()).password(user.getPassword())
+                    .disabled(!user.isEnabled()).authorities(Collections.emptyList())
+                    .build();
+        };
+    }
+    @Bean
+    public AuthenticationSuccessHandler loginSuccessHandler() {
+        return (request, response, authentication) -> {
+            System.out.println(authentication.getName() + " logged in!");
+            response.sendRedirect("/home");
+        };
+    }
+    @Bean
+    public LogoutSuccessHandler logoutSuccessHandler() {
+        return (request, response, authentication) -> {
+            System.out.println(authentication.getName() + " logged out!");
+            response.sendRedirect("/accounts/login?logout");
+        };
+    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                .authorizeHttpRequests(auth -> auth
+        return http.authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/home"
                                 , "/accounts/signup", "/accounts/login"
                                 , "/post/accounts/register", "/post/accounts/login"
@@ -39,34 +67,29 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
-                        .loginPage("/accounts/login")
-                        .loginProcessingUrl("/post/accounts/login")
-                        .defaultSuccessUrl("/home")  // redirect after login
-                        .failureUrl("/accounts/login?error")  // login error
+                        .loginPage("/accounts/login").loginProcessingUrl("/post/accounts/login")
+                        .successHandler(loginSuccessHandler()).defaultSuccessUrl("/home")
+                        .failureUrl("/accounts/login?error")
                         .permitAll()
                 )
-                .userDetailsService(userDetailsService)
+                .rememberMe(rememberMe -> rememberMe
+                        .tokenRepository(persistentTokenRepository(dataSource))
+                        .tokenValiditySeconds(1209600)
+                        .userDetailsService(userDetailsService())
+                )
+                .userDetailsService(userDetailsService())
                 .logout(logout -> logout
                         .logoutUrl("/logout")
-                        .logoutSuccessUrl("/accounts/login?logout")
+                        .logoutSuccessHandler(logoutSuccessHandler()).logoutSuccessUrl("/accounts/login?logout")
                         .permitAll()
-                );
-        return http.build();
+                ).build();
+    }
+    @Bean
+    public PersistentTokenRepository persistentTokenRepository(DataSource dataSource) {
+        JdbcTokenRepositoryImpl repo = new JdbcTokenRepositoryImpl();
+        repo.setDataSource(dataSource);
+        //repo.setCreateTableOnStartup(true);
+        return repo;
     }
 
-    @Service
-    private static class VerifyUserDetails implements UserDetailsService {
-        @Override
-        public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-            User user = User.getByUsername(username);
-            if (user == null) user = User.getByEmail(username);
-            if (user == null) throw new UsernameNotFoundException("User not found");
-            return org.springframework.security.core.userdetails.User.builder()
-                    .username(user.getUsername())
-                    .password(user.getPassword())
-                    .disabled(!user.isEnabled()) // prevent login if not verified
-                    .authorities(Collections.emptyList())
-                    .build();
-        }
-    }
 }

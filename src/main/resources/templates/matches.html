@@ -22,28 +22,30 @@
 
 <div class="container my-4">
 
-    <h1 class="mb-2">Find Matches</h1>
-    <form method="get" action="/matches" style="display: flex; align-items: center; padding: 5px;">
-        <label for="searchId" class="form-label" style="width: 30%">Select Search Profile</label>
-        <select class="form-select" id="searchId"  name="searchId" style="width: 60%" onchange="this.form.submit()">
-            <option th:value="0" disabled th:selected="${SearchID == 0}">
-                -- Choose a Search Profile --
-            </option>
-            <option th:each="sp : ${searchProfiles}"
-                    th:value="${sp.ID}"
-                    th:text="${sp.Name}"
-                    th:selected="${sp.ID == SearchID}">
-            </option>
-        </select>
-        <a th:href="@{/profile/search}" class="btn btn-danger ms-auto">Add Search</a>
-    </form>
+    <div class="d-flex">
+        <h4 class="mb-2">Find Matches</h4>
+        <form method="get" action="/matches" style="display: flex; align-items: center; padding: 5px;">
+            <label for="searchId" class="form-label" style="width: 30%">Select Search Profile</label>
+            <select class="form-select" id="searchId"  name="searchId" style="width: 60%" onchange="this.form.submit()">
+                <option th:value="0" disabled th:selected="${SearchID == 0}">
+                    -- Choose a Search Profile --
+                </option>
+                <option th:each="sp : ${searchProfiles}"
+                        th:value="${sp.ID}"
+                        th:text="${sp.Name}"
+                        th:selected="${sp.ID == SearchID}">
+                </option>
+            </select>
+            <a th:href="@{/profile/search}" class="btn btn-danger ms-auto">Add Search</a>
+        </form>
 
+    </div>
     <div class="row g-4 d-flex align-items-center" style="flex-wrap: wrap; justify-content: center;">
         <div class="profile-box" th:each="m : ${matches}">
             <div class="card h-100">
                 <div class="card-body">
                     <div class="profile-images mb-3">
-                        <img th:src="${m.Avatar != null ? '/img/avatar/' + m.ID + '.png' : '/img/default-pfp.png'}"
+                        <img th:src="${m.Avatar != null ? '/file/avatar/' + m.ID + '.png' : '/img/default-pfp.png'}"
                              class="rounded-circle" style="width: 100%; object-fit:cover;" alt="Profile Picture">
                     </div>
                     <div th:if="${m.ID != 0}" style="display: flex; align-items: center; justify-content: center;">

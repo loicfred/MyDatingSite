@@ -26,7 +26,7 @@ public class User implements DBSaver<User> {
         this.Username = username;
         this.Email = email;
         this.Password = password;
-        SaveElseWrite();
+        Write();
     }
 
     public static User getById(long id) {
@@ -50,6 +50,10 @@ public class User implements DBSaver<User> {
         if (U != null) U.Delete();
         U = DBM.retrieveItems(User.class).where("Email = ? AND Enabled = ?", email, false).mapFirstTo(User.class);
         if (U != null) U.Delete();
+    }
+
+    public static int ClearAllFailedLogins() {
+        return DBM.deleteItems(User.class).where("Enabled = ?", false).delete();
     }
 
     public long getId() {
@@ -86,17 +90,17 @@ public class User implements DBSaver<User> {
     }
 
     @Override
-    public User Save() throws SQLException {
-        DBE.Save("ID = ?", ID); return this;
+    public int Update() throws SQLException {
+        return DBE.Update("ID = ?", ID);
     }
 
     @Override
-    public User SaveElseWrite() throws SQLException {
-        DBE.SaveElseWrite("ID = ?", ID); return this;
+    public int Delete() throws SQLException {
+        return DBE.Delete("ID = ?", ID);
     }
 
     @Override
-    public User Delete() throws SQLException {
-        DBE.Delete("ID = ?", ID); return this;
+    public User Write() throws SQLException {
+         return DBE.Write(false, false);
     }
 }

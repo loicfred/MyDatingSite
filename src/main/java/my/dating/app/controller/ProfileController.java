@@ -18,20 +18,17 @@ public class ProfileController {
     @GetMapping("/profile/{username}")
     public String profile(@PathVariable String username, Model model, Principal loggedUser) throws SQLException {
         model.addAttribute("principal", loggedUser);
-        User user = User.getByUsername(username);
-        while (user.getProfile().getPhotos().size() < 20) user.getProfile().getPhotos().add(new Profile_Photo());
-        model.addAttribute("user", user);
-        model.addAttribute("isOwner", loggedUser != null && loggedUser.getName().equals(user.getUsername()));
+        Profile.Profile_View profile = Profile.Profile_View.getView(username);
+        while (profile.getPhotos().size() < 20) profile.getPhotos().add(new Profile_Photo());
+        model.addAttribute("profile", profile);
+        model.addAttribute("isOwner", loggedUser != null && loggedUser.getName().equals(profile.Username));
         return "profile/view";
     }
 
     @GetMapping("/profile/edit")
     public String editProfile(Model model, Principal loggedUser) throws SQLException {
         model.addAttribute("principal", loggedUser);
-        String username = loggedUser.getName();
-        User user = User.getByUsername(username);
-        model.addAttribute("user", user);
-        model.addAttribute("profile", user.getProfile());
+        model.addAttribute("profile", Profile.Profile_Edit.getEdit(loggedUser.getName()));
         return "profile/edit";
     }
 
@@ -40,7 +37,7 @@ public class ProfileController {
         String username = loggedUser.getName();
         if (profile.ID == User.getByUsername(username).ID) {
             if (!profilePicFile.isEmpty()) profile.setAvatar(profilePicFile.getBytes());
-            profile.SaveElseWrite();
+            profile.Update();
         }
         return "redirect:/profile/edit?updated";
     }

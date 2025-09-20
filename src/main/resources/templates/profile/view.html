@@ -19,6 +19,11 @@
         }
 
 
+        .username-box {
+            display: block; margin-top: 80px; width: 100%; background: #00000011;
+            border-top-left-radius: 2%;border-top-right-radius: 2%; padding: 10px;"
+        }
+
         .doublepane {
             display: flex;
         }
@@ -71,43 +76,40 @@
 <header th:replace="/fragments/header :: mainHeader"></header>
 
 <div class="container mt-2 d-flex align-items-center" style="position: relative;">
-    <img th:src="${user.getProfile().Avatar != null ? '/img/avatar/' + user.Username + '.png' : '/img/default-pfp.png'}"
+    <img th:src="${profile.Avatar != null ? '/file/avatar/' + profile.Username + '.png' : '/img/default-pfp.png'}"
          class="pfp rounded-circle" style="width:150px;height:150px;object-fit:cover;" alt="Profile Picture">
 
-    <div style="display: block; margin-top: 80px; width: 100%; background: #00000011; border-top-left-radius: 2%; border-top-right-radius: 2%; padding: 10px;">
+    <div class="username-box">
         <div style="display: block; margin-left: 200px;">
-            <div style="display: flex; align-items: center; justify-content: center; gap: 15px;">
-                <h3 th:text="${'@' + user.getProfile().Name}">Username Profile</h3>
+            <div class="d-flex align-items-center" style="justify-content: center; gap: 15px;">
+                <h3 th:text="${'@' + profile.Name}">Username Profile</h3>
                 <a th:if="${isOwner}" th:href="@{/profile/edit}" class="btn btn-danger ms-auto" style="margin-right: 10px">Edit Profile</a>
             </div>
-            <div style="display: flex; align-items: center; gap: 15px;">
-                <h6 th:text="${'Gender: ' + user.getProfile().Gender}"></h6>
-                <h6 th:text="${'Age: ' + user.getProfile().Age}"></h6>
+            <div th:if="${profile != null}" class="d-flex align-items-center" style="gap: 15px;">
+                <h6 th:text="${'Gender: ' + profile.Gender}"></h6>
+                <h6 th:text="${'Age: ' + profile.Age}"></h6>
             </div>
         </div>
 
         <div class="doublepane">
             <div style="width: 50%; display: block; padding: 5px;">
                 <h4>Who am I?</h4>
-                <p style="padding: 5px;"><span th:text="${user.getProfile().WhoAmI}"></span></p>
+                <p style="padding: 5px;"><span th:text="${profile.WhoAmI}"></span></p>
                 <h4>What am I looking for?</h4>
-                <p style="padding: 5px;"><span th:text="${user.getProfile().WhatIWant}"></span></p>
+                <p style="padding: 5px;"><span th:text="${profile.WhatIWant}"></span></p>
                 <h4>What do I dislike?</h4>
-                <p style="padding: 5px;"><span th:text="${user.getProfile().WhatIDislike}"></span></p>
+                <p style="padding: 5px;"><span th:text="${profile.WhatIDislike}"></span></p>
 
                 <div class="mb-3">
                     <h4>Interests</h4>
                     <div id="interests-container">
-                        <span th:each="interest : ${user.getProfile().getInterests()}"
-                              th:data-value="${interest}"
-                              th:text="${interest.displayName}"
-                              class="interest-tag"></span>
+                        <span class="interest-tag" th:each="interest : ${profile.getInterests()}" th:data-value="${interest}" th:text="${interest.displayName}"></span>
                     </div>
                 </div>
             </div>
             <div class="photo-grid" style="width: 50%;">
-                <div class="profile-box" th:each="m : ${user.getProfile().getPhotos()}">
-                    <img th:if="${m.Image != null}" th:src="${'/img/photo/' + m.ID}" alt="User Photo" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                <div class="profile-box" th:each="m : ${profile.getPhotos()}">
+                    <img th:if="${m.Image != null}" th:src="${'/file/photo/' + m.ID}" alt="User Photo" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
                     <div th:unless="${m.Image != null}" style="background: #00000011; width: 100%; height: 100%;"></div>
                 </div>
             </div>

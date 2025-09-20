@@ -42,8 +42,7 @@ public class AuthController {
             model.addAttribute("success", false);
         } else {
             vToken.getUser().setEnabled(true);
-            vToken.getUser().Save();
-            new Profile(vToken.UserID);
+            vToken.getUser().Update();
             vToken.Delete();
             model.addAttribute("message", "Your account has been verified! You can now log in.");
             model.addAttribute("success", true);
@@ -61,7 +60,7 @@ public class AuthController {
     public String register(User user) throws SQLException {
         User.ClearFailedLogins(user.Username, user.Email);
         user.Password = passwordEncoder.encode(user.Password);
-        user.SaveElseWrite();
+        user.Write();
         String token = UUID.randomUUID().toString();
         new Email_Verification(user, token, "REGISTRATION");
         emailService.sendVerificationEmail(user.Email, token);

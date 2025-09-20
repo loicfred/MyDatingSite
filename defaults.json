@@ -1,5 +1,5 @@
 {
-  "DatabaseURL": "jdbc:mysql://localhost:3306/my_dating_app",
+  "DatabaseURL": "jdbc:mariadb://localhost:3309/my_dating_site",
   "DatabaseUsername": "root",
-  "DatabasePassword": "Database@2004"
+  "DatabasePassword": "MariaDB@2004"
 }

@@ -1,5 +1,7 @@
 package my.dating.app.object;
 
+import my.dating.app.object.msg.Message;
+import my.dating.app.object.msg.Message_Reaction;
 import my.utilities.db.DBSaver;
 import my.utilities.db.DatabaseEditor;
 import my.utilities.db.QueryParameter;
@@ -12,7 +14,7 @@ import static my.dating.app.MyDatingSiteApplication.DBM;
 
 public class Chat implements DBSaver<Chat> {
     public final transient DatabaseEditor<Chat> DBE = new DatabaseEditor<>(DBM,this, Chat.class);
-    private transient List<ChatMessage> Messages;
+    private transient List<Message.Message_View> Messages;
 
     public long ID;
     public long UserID1;
@@ -23,33 +25,33 @@ public class Chat implements DBSaver<Chat> {
         this.ID = Instant.now().toEpochMilli();
         this.UserID1 = user.ID;
         this.UserID2 = user2.ID;
-        SaveElseWrite();
+        Write();
     }
 
     public static Chat getById(long id) {
         return DBM.retrieveItems(Chat.class).where("ID = ?", id).mapFirstTo(Chat.class);
     }
-    public List<ChatMessage> getMessages(String... select) {
-        return Messages == null ? Messages = ChatMessage.getByChat(ID, select) : Messages;
+    public List<Message.Message_View> getMessages(String... select) {
+        return Messages == null ? Messages = Message.Message_View.getByChat(ID, select) : Messages;
     }
 
     public void readAllMessages(long userid) {
-        DBM.updateItems(ChatMessage.class).set(new QueryParameter("isRead", true)).where("ChatID = ? AND UserID = ?", ID, userid).update();
+        DBM.updateItems(Message.class).set(new QueryParameter("isRead", true)).where("ChatID = ? AND UserID = ?", ID, userid).update();
     }
 
     @Override
-    public Chat Save() throws SQLException {
-        DBE.Save("ID = ?", ID); return this;
+    public int Update() throws SQLException {
+        return DBE.Update("ID = ?", ID);
     }
 
     @Override
-    public Chat SaveElseWrite() throws SQLException {
-        DBE.SaveElseWrite("ID = ?", ID); return this;
+    public int Delete() throws SQLException {
+        return DBE.Delete("ID = ?", ID);
     }
 
     @Override
-    public Chat Delete() throws SQLException {
-        DBE.Delete("ID = ?", ID); return this;
+    public Chat Write() throws SQLException {
+         return DBE.Write(false, true);
     }
 
     public static class Latest_Chat extends Chat {
@@ -110,6 +112,10 @@ public class Chat implements DBSaver<Chat> {
         }
         public void setUnreads(Long unreads) {
             Unreads = unreads;
+        }
+
+        public long getMyId() {
+            return PartnerID == UserID2 ? UserID1 : UserID2;
         }
 
     }

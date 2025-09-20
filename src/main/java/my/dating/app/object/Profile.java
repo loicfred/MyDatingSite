@@ -1,7 +1,6 @@
 package my.dating.app.object;
 
-import my.dating.app.object.enums.Interest;
-import my.dating.app.object.enums.Language;
+import my.dating.app.object.enums.*;
 import my.utilities.db.DBSaver;
 import my.utilities.db.DatabaseEditor;
 import my.utilities.db.QueryParameter;
@@ -69,7 +68,7 @@ public class Profile implements DBSaver<Profile> {
         return Gender;
     }
     public void setGender(String val) {
-        if (!val.isEmpty()) Gender = DBE.AddSet("Gender", val);
+        if (!val.isEmpty()) Gender = DBE.AddSet("Gender", my.dating.app.object.enums.Gender.valueOf(val).name());
     }
 
     public String WhoAmI;
@@ -101,7 +100,7 @@ public class Profile implements DBSaver<Profile> {
         return PersonalityType;
     }
     public void setPersonalityType(String val) {
-        if (!val.isEmpty()) PersonalityType = DBE.AddSet("PersonalityType", val);
+        if (!val.isEmpty()) PersonalityType = DBE.AddSet("PersonalityType", my.dating.app.object.enums.PersonalityType.valueOf(val).name());
     }
 
     public String Occupation;
@@ -125,7 +124,7 @@ public class Profile implements DBSaver<Profile> {
         return Religion;
     }
     public void setReligion(String val) {
-        if (!val.isEmpty()) Religion = DBE.AddSet("Religion", val);
+        if (!val.isEmpty()) Religion = DBE.AddSet("Religion", my.dating.app.object.enums.Religion.valueOf(val).name());
     }
 
     public String WouldCook;
@@ -133,7 +132,7 @@ public class Profile implements DBSaver<Profile> {
         return WouldCook;
     }
     public void setWouldCook(String val) {
-        if (!val.isEmpty()) WouldCook = DBE.AddSet("WouldCook", val);
+        if (!val.isEmpty()) WouldCook = DBE.AddSet("WouldCook", LifestylePreference.valueOf(val).name());
     }
 
     public String WouldChore;
@@ -141,31 +140,31 @@ public class Profile implements DBSaver<Profile> {
         return WouldChore;
     }
     public void setWouldChore(String val) {
-        if (!val.isEmpty()) WouldChore = DBE.AddSet("WouldChore", val);
+        if (!val.isEmpty()) WouldChore = DBE.AddSet("WouldChore", LifestylePreference.valueOf(val).name());
     }
 
     public String StatusSmoking;
-    public String getSmoking() {
+    public String getStatusSmoking() {
         return StatusSmoking;
     }
-    public void setSmoking(String val) {
-        if (!val.isEmpty()) StatusSmoking = DBE.AddSet("SmokingStatus", val);
+    public void setStatusSmoking(String val) {
+        if (!val.isEmpty()) StatusSmoking = DBE.AddSet("SmokingStatus", BadHabit.valueOf(val).name());
     }
 
     public String StatusDrinking;
-    public String getDrinking() {
+    public String getStatusDrinking() {
         return StatusDrinking;
     }
-    public void setDrinking(String val) {
-        if (!val.isEmpty()) StatusDrinking = DBE.AddSet("StatusDrinking", val);
+    public void setStatusDrinking(String val) {
+        if (!val.isEmpty()) StatusDrinking = DBE.AddSet("StatusDrinking", BadHabit.valueOf(val).name());
     }
 
     public String StatusExercise;
-    public String getExercise() {
+    public String getStatusExercise() {
         return StatusExercise;
     }
-    public void setExercise(String val) {
-        if (!val.isEmpty()) StatusExercise = DBE.AddSet("StatusExercise", val);
+    public void setStatusExercise(String val) {
+        if (!val.isEmpty()) StatusExercise = DBE.AddSet("StatusExercise", BadHabit.valueOf(val).name());
     }
 
     public String Allergies;
@@ -192,12 +191,12 @@ public class Profile implements DBSaver<Profile> {
         WantMarriage = DBE.AddSet("WantMarriage", val);
     }
 
-    public boolean DoesReligionMatter = false;
+    public boolean ReligionMatter = false;
     public boolean getReligionMatter() {
-        return DoesReligionMatter;
+        return ReligionMatter;
     }
     public void setReligionMatter(boolean val) {
-        DoesReligionMatter = DBE.AddSet("DoesReligionMatter", val);
+        ReligionMatter = DBE.AddSet("ReligionMatter", val);
     }
 
     public String WantKids;
@@ -205,7 +204,7 @@ public class Profile implements DBSaver<Profile> {
         return WantKids;
     }
     public void setWantKids(String val) {
-        if (!val.isEmpty()) WantKids = DBE.AddSet("WantKids", val);
+        if (!val.isEmpty()) WantKids = DBE.AddSet("WantKids", KidsPreference.valueOf(val).name());
     }
 
     public String Diet;
@@ -240,12 +239,12 @@ public class Profile implements DBSaver<Profile> {
         WillingToRelocate = DBE.AddSet("WillingToRelocate", val);
     }
 
-    public boolean isVirgin = false;
+    public boolean Virgin = false;
     public boolean getVirgin() {
-        return isVirgin;
+        return Virgin;
     }
     public void setVirgin(boolean val) {
-        isVirgin = DBE.AddSet("isVirgin", val);
+        Virgin = DBE.AddSet("Virgin", val);
     }
 
     public int PastPartners = 0;
@@ -254,6 +253,22 @@ public class Profile implements DBSaver<Profile> {
     }
     public void setPastPartners(int val) {
         PastPartners = DBE.AddSet("PastPartners", Math.max(0,val));
+    }
+
+    public boolean MessageRead = false;
+    public boolean getMessageRead() {
+        return MessageRead;
+    }
+    public void setMessageRead(boolean val) {
+        MessageRead = DBE.AddSet("MessageRead", val);
+    }
+
+    public String MessageReplySpeed;
+    public String getMessageReplySpeed() {
+        return MessageReplySpeed;
+    }
+    public void setMessageReplySpeed(String val) {
+        if (!val.isEmpty()) MessageReplySpeed = DBE.AddSet("MessageReplySpeed", Rapidity.valueOf(val).name());
     }
 
     public double Latitude = 0;
@@ -281,15 +296,11 @@ public class Profile implements DBSaver<Profile> {
     public Profile() {}
     public Profile(long userid) throws SQLException {
         this.ID = userid;
-        SaveElseWrite();
+        Write();
     }
 
     public static Profile getById(long id) {
         return DBM.retrieveItems(Profile.class).where("ID = ?", id).mapFirstTo(Profile.class);
-    }
-
-    public static List<Profile> search(long searchId, int page) throws SQLException {
-        return DBM.processQuery("CALL MatchUsers(?,?,?);", searchId, page, 100).stream().map(row -> row.mapTo(Profile.class)).collect(Collectors.toList());
     }
 
     public List<Profile_Photo> getPhotos() {
@@ -297,32 +308,46 @@ public class Profile implements DBSaver<Profile> {
     }
 
     @Override
-    public Profile Save() throws SQLException {
-        DBE.Save("ID = ?", ID); return this;
+    public int Update() throws SQLException {
+        return DBE.Update("ID = ?", ID);
     }
 
     @Override
-    public Profile SaveElseWrite() throws SQLException {
-        DBE.SaveElseWrite("ID = ?", ID); return this;
+    public int Delete() throws SQLException {
+        return DBE.Delete("ID = ?", ID);
     }
 
     @Override
-    public Profile Delete() throws SQLException {
-        DBE.Delete("ID = ?", ID); return this;
+    public Profile Write() throws SQLException {
+         return DBE.Write(false, true);
     }
 
     public static class Profile_View extends Profile {
-        public Long Age;
         public String Username;
         public String Email;
+        public Long Age;
 
         public Profile_View() {}
 
-        public static Profile_View get(long id) {
+        public static Profile_View getView(long id) {
             return DBM.retrieveItems(Profile_View.class).where("ID = ?", id).mapFirstTo(Profile_View.class);
         }
-        public static Profile_View get(String username) {
+        public static Profile_View getView(String username) {
             return DBM.retrieveItems(Profile_View.class).where("Username = ?", username).mapFirstTo(Profile_View.class);
+        }
+
+        public static List<Profile_View> search(long searchId, int page) throws SQLException {
+            return DBM.processQuery("CALL MatchUsers(?,?,?);", searchId, page, 100).stream().map(row -> row.mapTo(Profile_View.class)).collect(Collectors.toList());
+        }
+    }
+
+    public static class Profile_Edit extends Profile_View {
+        public Long NullFields;
+
+        public Profile_Edit() {}
+
+        public static Profile_Edit getEdit(String username) throws SQLException {
+            return DBM.processQuery("CALL FetchUserdata(?,?,?);", "profile_view", "Username", username).get(0).mapTo(Profile_Edit.class);
         }
     }
 }

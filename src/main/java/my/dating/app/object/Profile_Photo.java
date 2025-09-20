@@ -21,7 +21,7 @@ public class Profile_Photo implements DBSaver<Profile_Photo> {
         this.ID = Instant.now().toEpochMilli();
         this.UserID = user.ID;
         this.Image = img;
-        SaveElseWrite();
+        Write();
     }
 
     public static Profile_Photo getById(long id) {
@@ -32,17 +32,17 @@ public class Profile_Photo implements DBSaver<Profile_Photo> {
     }
 
     @Override
-    public Profile_Photo Save() throws SQLException {
-        DBE.Save("ID = ?", ID); return this;
+    public int Update() throws SQLException {
+        return DBE.Update("ID = ?", ID);
     }
 
     @Override
-    public Profile_Photo SaveElseWrite() throws SQLException {
-        DBE.SaveElseWrite("ID = ?", ID); return this;
+    public int Delete() throws SQLException {
+        return DBE.Delete("ID = ?", ID);
     }
 
     @Override
-    public Profile_Photo Delete() throws SQLException {
-        DBE.Delete("ID = ?", ID); return this;
+    public Profile_Photo Write() throws SQLException {
+        return DBE.Write(false, true);
     }
 }
