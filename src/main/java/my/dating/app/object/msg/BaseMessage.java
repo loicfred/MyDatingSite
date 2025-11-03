@@ -1,6 +1,8 @@
 package my.dating.app.object.msg;
 
-public class BaseMessage {
+import my.dating.app.service.DatabaseObject;
+
+public class BaseMessage<T> extends DatabaseObject<T> {
     public Long ID;
     public long ChatID;
     public long UserID;

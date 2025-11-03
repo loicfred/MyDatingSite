@@ -118,8 +118,7 @@
                     <label class="form-label fw-semibold">Languages</label>
                     <div id="languages-container">
                       <span th:each="language : ${T(my.dating.app.object.enums.Language).values()}"
-                            th:data-value="${language}"
-                            th:text="${language.displayName}"
+                            th:data-value="${language}" th:text="${language.displayName}"
                             class="language-tag"></span>
                     </div>
                     <div id="languages-selected-inputs">
@@ -137,7 +136,7 @@
                     </select>
                   </div>
 
-                  <!-- Button -->
+                  <!-- Map Button -->
                   <div class="mb-3">
                     <label class="form-label fw-semibold">Location (Warning: Never use your exact location, but an area surrounding.)</label>
                     <div class="input-group">
@@ -149,7 +148,7 @@
                     </div>
                   </div>
 
-                  <!-- Modal -->
+                  <!-- Map Modal -->
                   <div class="modal fade" id="mapModal" tabindex="-1" aria-hidden="true">
                     <div class="modal-dialog modal-xl modal-dialog-centered">
                       <div class="modal-content">
@@ -177,22 +176,22 @@
               </h2>
               <div id="collapseLifestyle" class="accordion-collapse collapse show" data-bs-parent="#profileAccordion">
                 <div class="accordion-body">
-                  <!-- Education -->
+                  <!-- LifestyleEducation -->
                   <div class="mb-3">
                     <label class="form-label fw-semibold">What studies did you do?</label>
-                    <input type="text" th:field="*{Education}" class="form-control" placeholder="How far you went in your studies?"/>
+                    <input type="text" th:field="*{LifestyleEducation}" class="form-control" placeholder="How far you went in your studies?"/>
                   </div>
 
-                  <!-- Occupation -->
+                  <!-- LifestyleOccupation -->
                   <div class="mb-3">
                     <label class="form-label fw-semibold">Do you have a job? What is it?</label>
-                    <input type="text" th:field="*{Occupation}" class="form-control" placeholder="Your job or profession"/>
+                    <input type="text" th:field="*{LifestyleOccupation}" class="form-control" placeholder="Your job or profession"/>
                   </div>
 
                   <!-- Religion -->
                   <div class="mb-3">
                     <label class="form-label fw-semibold">What is your religion?</label>
-                    <select th:field="*{Religion}" class="form-select">
+                    <select th:field="*{LifestyleReligion}" class="form-select">
                       <option value="">Choose an option</option>
                       <option th:each="r : ${T(my.dating.app.object.enums.Religion).values()}"
                               th:value="${r}" th:text="${r.displayName}"></option>
@@ -202,7 +201,7 @@
                   <!-- Diet -->
                   <div class="mb-3">
                     <label class="form-label fw-semibold">What are your diet habits?</label>
-                    <select th:field="*{Diet}" class="form-select">
+                    <select th:field="*{LifestyleDiet}" class="form-select">
                       <option value="">Choose an option</option>
                       <option th:each="d : ${T(my.dating.app.object.enums.Diet).values()}"
                               th:value="${d}" th:text="${d.displayName}"></option>
@@ -212,7 +211,7 @@
                   <!-- Cooking -->
                   <div class="mb-3">
                     <label class="form-label fw-semibold">Would you cook for your partner if you are able to?</label>
-                    <select th:field="*{WouldCook}" class="form-select">
+                    <select th:field="*{LifestyleWouldCook}" class="form-select">
                       <option value="">Choose an option</option>
                       <option th:each="opt : ${T(my.dating.app.object.enums.LifestylePreference).values()}"
                               th:value="${opt}" th:text="${opt.displayName}">
@@ -223,7 +222,7 @@
                   <!-- Chores -->
                   <div class="mb-3">
                     <label class="form-label fw-semibold">Would you take care of the household chores if you are able to?</label>
-                    <select th:field="*{WouldChore}" class="form-select">
+                    <select th:field="*{LifestyleWouldChore}" class="form-select">
                       <option value="">Choose an option</option>
                       <option th:each="opt : ${T(my.dating.app.object.enums.LifestylePreference).values()}"
                               th:value="${opt}" th:text="${opt.displayName}">
@@ -234,7 +233,7 @@
                   <!-- Smoking -->
                   <div class="mb-3">
                     <label class="form-label fw-semibold">Do you smoke?</label>
-                    <select th:field="*{StatusSmoking}" class="form-select">
+                    <select th:field="*{LifestyleSmoking}" class="form-select">
                       <option value="">Choose an option</option>
                       <option th:each="opt : ${T(my.dating.app.object.enums.BadHabit).values()}"
                               th:value="${opt}" th:text="${opt.displayName}">
@@ -245,7 +244,7 @@
                   <!-- Drinking -->
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Do you drink alcohol?</label>
-                        <select th:field="*{StatusDrinking}" class="form-select">
+                        <select th:field="*{LifestyleDrinking}" class="form-select">
                             <option value="">Choose an option</option>
                             <option th:each="opt : ${T(my.dating.app.object.enums.BadHabit).values()}"
                                     th:value="${opt}" th:text="${opt.displayName}">
@@ -256,7 +255,7 @@
                   <!-- Exercise -->
                   <div class="mb-3">
                     <label class="form-label fw-semibold">Do you exercise?</label>
-                    <select th:field="*{StatusExercise}" class="form-select">
+                    <select th:field="*{LifestyleExercise}" class="form-select">
                       <option value="">Choose an option</option>
                       <option th:each="opt : ${T(my.dating.app.object.enums.BadHabit).values()}"
                               th:value="${opt}" th:text="${opt.displayName}">
@@ -267,18 +266,19 @@
                   <!-- Illness -->
                   <div class="mb-3">
                     <label class="form-label fw-semibold">Do you have any allergies or illness?</label>
-                    <input type="text" th:field="*{Allergies}" class="form-control" placeholder="Tell us about your allergies or illnesses."/>
+                    <input type="text" th:field="*{LifestyleAllergies}" class="form-control" placeholder="Tell us about your allergies or illnesses."/>
                   </div>
 
                   <!-- Disability -->
                   <div class="mb-3">
                     <label class="form-label fw-semibold">Do you have any disabilities?</label>
-                    <input type="text" th:field="*{Disability}" class="form-control" placeholder="Tell us about your disabilities."/>
+                    <input type="text" th:field="*{LifestyleDisability}" class="form-control" placeholder="Tell us about your disabilities."/>
                   </div>
 
                   <!-- Pets -->
                   <div class="mb-3">
-                    <input type="checkbox" th:field="*{LikePets}" /> Do you like pets?
+                      <label class="form-label fw-semibold">Do you have any pets?</label>
+                      <input type="text" th:field="*{LifestylePets}" class="form-control" placeholder="Tell us about your pets."/>
                   </div>
 
                 </div>
@@ -286,14 +286,14 @@
             </div>
               <div class="accordion-item">
                   <h2 class="accordion-header" id="headingContact">
-                      <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseContact">Messenging</button>
+                      <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseContact">Messaging</button>
                   </h2>
                   <div id="collapseContact" class="accordion-collapse collapse show" data-bs-parent="#profileAccordion">
                       <div class="accordion-body">
 
                           <!-- Rapidity -->
                           <div class="mb-3">
-                              <input type="checkbox" th:field="*{MessageRead}" /> Do you often leave people on 'read'?
+                              <input type="checkbox" th:field="*{MessageLeaveOnRead}" /> Do you often leave people on 'read'?
                           </div>
 
                           <!-- Rapidity -->
@@ -313,35 +313,35 @@
 
             <div class="accordion-item">
               <h2 class="accordion-header" id="headingFamily">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFamily">Family & Couple</button>
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFamily">Love life</button>
               </h2>
               <div id="collapseFamily" class="accordion-collapse collapse show" data-bs-parent="#profileAccordion">
                 <div class="accordion-body">
 
                   <!-- Previous Relationship -->
                   <div class="mb-3">
-                    How many previous partners do you have? <input type="number" th:field="*{PastPartners}"/>
+                    How many previous partners do you have? <input type="number" th:field="*{LovelifePastPartners}"/>
                   </div>
 
                   <!-- Virginity -->
                   <div class="mb-3">
-                    <input type="checkbox" th:field="*{Virgin}"/> Are you a virgin?
+                    <input type="checkbox" th:field="*{LovelifeVirginity}"/> Are you a virgin?
                   </div>
 
                   <!-- Marriage -->
                   <div class="mb-3">
-                    <input type="checkbox" th:field="*{WantMarriage}" /> Are you looking for a partner to marry?
+                    <input type="checkbox" th:field="*{LovelifeMarriage}" /> Are you looking for a partner to marry?
                   </div>
 
                   <!-- Religion matter -->
                   <div class="mb-3">
-                    <input type="checkbox" th:field="*{ReligionMatter}" /> If yes, must your partner be of same religion as you?
+                    <input type="checkbox" th:field="*{LovelifeReligionMatter}" /> If yes, must your partner be of same religion as you?
                   </div>
 
                   <!-- Children -->
                   <div class="mb-3">
                     <label class="form-label fw-semibold">Do you plan to have kids?</label>
-                    <select th:field="*{WantKids}" class="form-select">
+                    <select th:field="*{LovelifeWantKids}" class="form-select">
                       <option value="">Choose an option</option>
                       <option th:each="opt : ${T(my.dating.app.object.enums.KidsPreference).values()}"
                               th:value="${opt}" th:text="${opt.displayName}">
@@ -350,12 +350,12 @@
 
                   <!-- Already have children -->
                   <div class="mb-3">
-                    <input type="checkbox" th:field="*{AlreadyHaveChildren}" /> Do you already have children?
+                    <input type="checkbox" th:field="*{LovelifeAlreadyHaveChildren}" /> Do you already have children?
                   </div>
 
                   <!-- Willing to relocate -->
                   <div class="mb-3">
-                    <input type="checkbox" th:field="*{WillingToRelocate}"/> Are you willing to relocate for your partner?
+                    <input type="checkbox" th:field="*{LovelifeWillingToRelocate}"/> Are you willing to relocate for your partner?
                   </div>
 
                 </div>
@@ -376,6 +376,49 @@
 
 <footer th:replace="/fragments/footer :: mainFooter"></footer>
 
+<script>
+
+    function setupSelectableGroup(groupName) {
+        const container = document.getElementById(`${groupName}-container`);
+        const selectedInputs = document.getElementById(`${groupName}-selected-inputs`);
+        const tagClass = `${groupName}-tag`;
+
+        const selected = new Set();
+        selectedInputs.querySelectorAll(`input[name="${groupName}"]`).forEach(i => selected.add(i.value));
+
+        function updateHiddenInputs() {
+            selectedInputs.innerHTML = '';
+            selected.forEach(value => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = groupName;
+                input.value = value;
+                selectedInputs.appendChild(input);
+            });
+        }
+
+        // Pre-select tags
+        container.querySelectorAll(`.${tagClass}`).forEach(tag => {
+            if (selected.has(tag.dataset.value)) tag.classList.add('selected');
+        });
+
+        // Handle tag clicks
+        container.addEventListener('click', e => {
+            if (!e.target.classList.contains(tagClass)) return;
+            const value = e.target.dataset.value;
+            if (selected.has(value)) {
+                selected.delete(value);
+                e.target.classList.remove('selected');
+            } else {
+                selected.add(value);
+                e.target.classList.add('selected');
+            }
+            updateHiddenInputs();
+        });
+    }
+    setupSelectableGroup('interests');
+    setupSelectableGroup('languages');
+</script>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const container = document.getElementById('interests-container');
@@ -454,6 +497,7 @@
     });
   });
 </script>
+
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     let map, marker;

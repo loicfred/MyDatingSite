@@ -1,16 +1,11 @@
 package my.dating.app.object;
 
-import my.utilities.db.DBSaver;
-import my.utilities.db.DatabaseEditor;
+import my.dating.app.service.DatabaseObject;
 
-import java.sql.SQLException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
-import static my.dating.app.MyDatingSiteApplication.DBM;
-
-public class Email_Verification implements DBSaver<Email_Verification> {
-    public final transient DatabaseEditor<Email_Verification> DBE = new DatabaseEditor<>(DBM,this, Email_Verification.class);
+public class Email_Verification extends DatabaseObject<Email_Verification> {
     private transient User U;
 
     public long ID;
@@ -20,7 +15,7 @@ public class Email_Verification implements DBSaver<Email_Verification> {
     public Long ExpiryDate;
 
     public Email_Verification() {}
-    public Email_Verification(User user, String token, String type) throws SQLException {
+    public Email_Verification(User user, String token, String type) {
         this.ID = Instant.now().toEpochMilli();
         this.UserID = user.ID;
         this.Token = token;
@@ -30,10 +25,10 @@ public class Email_Verification implements DBSaver<Email_Verification> {
     }
 
     public static Email_Verification getById(long id) {
-        return DBM.retrieveItems(Email_Verification.class).where("ID = ?", id).mapFirstTo(Email_Verification.class);
+        return DatabaseObject.getById(Email_Verification.class, id).orElse(null);
     }
     public static Email_Verification getByToken(String token) {
-        return DBM.retrieveItems(Email_Verification.class).where("Token = ?", token).mapFirstTo(Email_Verification.class);
+        return DatabaseObject.getWhere(Email_Verification.class, "Token = ?", token).orElse(null);
     }
 
     public User getUser() {
@@ -41,23 +36,8 @@ public class Email_Verification implements DBSaver<Email_Verification> {
     }
 
     public static void ClearUnregisterUsers() {
-        for (Email_Verification vToken : DBM.retrieveItems(Email_Verification.class).where("Type = ? AND ExpiryDate < ?", "REGISTRATION", Instant.now().toEpochMilli()).mapAllTo(Email_Verification.class)) {
-            DBM.deleteItems(User.class).where("ID = ?", vToken.UserID).delete();
+        for (Email_Verification vToken : DatabaseObject.getAllWhere(Email_Verification.class, "Type = ? AND ExpiryDate < ?","REGISTRATION", Instant.now().toEpochMilli())) {
+            vToken.getUser().Delete();
         }
-    }
-
-    @Override
-    public int Update() throws SQLException {
-        return DBE.Update("ID = ?", ID);
-    }
-
-    @Override
-    public int Delete() throws SQLException {
-        return DBE.Delete("ID = ?", ID);
-    }
-
-    @Override
-    public Email_Verification Write() throws SQLException {
-         return DBE.Write(false, true);
     }
 }

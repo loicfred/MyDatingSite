@@ -1,8 +1,10 @@
 package my.dating.app.object.msg.attachment;
 
+import my.dating.app.service.DatabaseObject;
+
 import java.time.Instant;
 
-public class BaseAttachment {
+public class BaseAttachment<T> extends DatabaseObject<T> {
     public long ID = Instant.now().toEpochMilli();
     public long MessageID;
     public String FileName;

@@ -1,23 +1,18 @@
 package my.dating.app.object;
 
-import my.utilities.db.DBSaver;
-import my.utilities.db.DatabaseEditor;
+import my.dating.app.service.DatabaseObject;
 
-import java.sql.SQLException;
 import java.time.Instant;
 import java.util.List;
 
-import static my.dating.app.MyDatingSiteApplication.DBM;
-
-public class Profile_Photo implements DBSaver<Profile_Photo> {
-    public final transient DatabaseEditor<Profile_Photo> DBE = new DatabaseEditor<>(DBM,this, Profile_Photo.class);
+public class Profile_Photo extends DatabaseObject<Profile_Photo> {
 
     public long ID;
     public long UserID;
     public byte[] Image;
 
     public Profile_Photo() {}
-    public Profile_Photo(User user, byte[] img) throws SQLException {
+    public Profile_Photo(User user, byte[] img) {
         this.ID = Instant.now().toEpochMilli();
         this.UserID = user.ID;
         this.Image = img;
@@ -25,24 +20,9 @@ public class Profile_Photo implements DBSaver<Profile_Photo> {
     }
 
     public static Profile_Photo getById(long id) {
-        return DBM.retrieveItems(Profile_Photo.class).where("ID = ?", id).mapFirstTo(Profile_Photo.class);
+        return DatabaseObject.getById(Profile_Photo.class, id).orElse(null);
     }
     public static List<Profile_Photo> getByUser(long userid) {
-        return DBM.retrieveItems(Profile_Photo.class).where("UserID = ?", userid).mapAllTo(Profile_Photo.class);
-    }
-
-    @Override
-    public int Update() throws SQLException {
-        return DBE.Update("ID = ?", ID);
-    }
-
-    @Override
-    public int Delete() throws SQLException {
-        return DBE.Delete("ID = ?", ID);
-    }
-
-    @Override
-    public Profile_Photo Write() throws SQLException {
-        return DBE.Write(false, true);
+        return DatabaseObject.getAllWhere(Profile_Photo.class, "UserID = ?", userid);
     }
 }

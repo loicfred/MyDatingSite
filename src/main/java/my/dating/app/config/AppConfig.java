@@ -1,16 +1,17 @@
 package my.dating.app.config;
 
-import my.utilities.db.DatabaseManager;
-import my.utilities.db.DatabaseType;
+import my.dating.app.service.DatabaseObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 import javax.sql.DataSource;
 
 @Configuration
 public class AppConfig {
+
 
     @Value("${spring.datasource.url}")
     private String dbUrl;
@@ -33,4 +34,12 @@ public class AppConfig {
         ds.setDriverClassName(dbDriver);
         return ds;
     }
+
+    @Bean
+    public JdbcTemplate jdbcTemplate(DataSource ds) {
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
+        DatabaseObject.setJdbcTemplate(jdbcTemplate);
+        return jdbcTemplate;
+    }
+
 }

@@ -1,58 +1,43 @@
 package my.dating.app.object;
 
 import my.dating.app.object.enums.*;
-import my.utilities.db.DBSaver;
-import my.utilities.db.DatabaseEditor;
-import my.utilities.db.QueryParameter;
+import my.dating.app.service.DatabaseObject;
 
-import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static my.dating.app.MyDatingSiteApplication.DBM;
-
-public class Profile implements DBSaver<Profile> {
-    private final transient DatabaseEditor<Profile> DBE = new DatabaseEditor<>(DBM,this, Profile.class);
+public class Profile extends DatabaseObject<Profile> {
     private transient List<Profile_Photo> photos;
-
-    public transient Set<Interest> interests;
-    public Set<Interest> getInterests() {
-        return interests == null ? interests = DBM.retrieveItems("profile_to_interest").where("UserID = ?", ID).select("Value").get().stream().map(TR -> Interest.valueOf(TR.getAsString("Value"))).collect(Collectors.toSet()) : interests;
-    }
-    public void setInterests(Set<Interest> interests) {
-        this.interests = interests;
-        DBM.deleteItems("profile_to_interest").where("UserID = ?", ID).delete();
-        for (Interest I : interests)
-            DBM.createItem("profile_to_interest").create(new QueryParameter("UserID", ID), new QueryParameter("Value", I.name()));
-    }
-
-    public transient Set<Language> languages;
-    public Set<Language> getLanguages() {
-        return languages == null ? languages = DBM.retrieveItems("profile_to_language").where("UserID = ?", ID).select("Value").get().stream().map(TR -> Language.valueOf(TR.getAsString("Value"))).collect(Collectors.toSet()) : languages;
-    }
-    public void setLanguages(Set<Language> languages) {
-        this.languages = languages;
-        DBM.deleteItems("profile_to_language").where("UserID = ?", ID).delete();
-        for (Language I : languages)
-            DBM.createItem("profile_to_language").create(new QueryParameter("UserID", ID), new QueryParameter("Value", I.name()));
-    }
 
     public long ID = 0;
     public long getID() {
         return ID;
     }
     public void setID(long id) {
-        ID = DBE.AddSet("ID", id);
+        ID = id;
     }
 
-    public String Name = "New User";
+    public String Name;
     public String getName() {
         return Name;
     }
     public void setName(String val) {
-        Name = DBE.AddSet("Name", val);
+        Name = val;
+    }
+
+    public String Gender;
+    public String getGender() {
+        return Gender;
+    }
+    public void setGender(String val) {
+        if (!val.isEmpty()) Gender = my.dating.app.object.enums.Gender.valueOf(val).name();
+    }
+
+    public byte[] Avatar = null;
+    public void setAvatar(byte[] avatar) {
+        Avatar = avatar;
     }
 
     public LocalDate DateOfBirth;
@@ -60,15 +45,7 @@ public class Profile implements DBSaver<Profile> {
         return DateOfBirth;
     }
     public void setDateOfBirth(LocalDate val) {
-        if (val != null) DateOfBirth = DBE.AddSet("DateOfBirth", val);
-    }
-
-    public String Gender = "Male";
-    public String getGender() {
-        return Gender;
-    }
-    public void setGender(String val) {
-        if (!val.isEmpty()) Gender = DBE.AddSet("Gender", my.dating.app.object.enums.Gender.valueOf(val).name());
+        if (val != null) DateOfBirth = val;
     }
 
     public String WhoAmI;
@@ -76,7 +53,7 @@ public class Profile implements DBSaver<Profile> {
         return WhoAmI;
     }
     public void setWhoAmI(String val) {
-        if (!val.isEmpty()) WhoAmI = DBE.AddSet("WhoAmI", val);
+        if (!val.isEmpty()) WhoAmI = val;
     }
 
     public String WhatIWant;
@@ -84,7 +61,7 @@ public class Profile implements DBSaver<Profile> {
         return WhatIWant;
     }
     public void setWhatIWant(String val) {
-        if (!val.isEmpty()) WhatIWant = DBE.AddSet("WhatIWant", val);
+        if (!val.isEmpty()) WhatIWant = val;
     }
 
     public String WhatIDislike;
@@ -92,7 +69,7 @@ public class Profile implements DBSaver<Profile> {
         return WhatIDislike;
     }
     public void setWhatIDislike(String val) {
-        if (!val.isEmpty()) WhatIDislike = DBE.AddSet("WhatIDislike", val);
+        if (!val.isEmpty()) WhatIDislike = val;
     }
 
     public String PersonalityType;
@@ -100,167 +77,152 @@ public class Profile implements DBSaver<Profile> {
         return PersonalityType;
     }
     public void setPersonalityType(String val) {
-        if (!val.isEmpty()) PersonalityType = DBE.AddSet("PersonalityType", my.dating.app.object.enums.PersonalityType.valueOf(val).name());
+        if (!val.isEmpty()) PersonalityType = my.dating.app.object.enums.PersonalityType.valueOf(val).name();
     }
 
-    public String Occupation;
-    public String getOccupation() {
-        return Occupation;
+    public transient Set<Interest> interests;
+    public Set<Interest> getInterests() {
+        return interests == null ? interests = DatabaseObject.doQuery("SELECT Value FROM profile_to_interest WHERE UserID = ?", ID).stream()
+                .map(row -> Interest.valueOf(row.get("Value").toString())).collect(Collectors.toSet()) : interests;
     }
-    public void setOccupation(String val) {
-        if (!val.isEmpty()) Occupation = DBE.AddSet("Occupation", val);
-    }
-
-    public String Education;
-    public String getEducation() {
-        return Education;
-    }
-    public void setEducation(String val) {
-        if (!val.isEmpty()) Education = DBE.AddSet("Education", val);
+    public void setInterests(Set<Interest> interests) {
+        this.interests = interests;
+        DatabaseObject.doUpdate("DELETE FROM profile_to_interest WHERE UserID = ?", ID);
+        for (Interest I : interests)
+            DatabaseObject.doUpdate("INSERT INTO profile_to_interest (UserID, Value) VALUES (?,?)", ID, I.name());
     }
 
-    public String Religion;
-    public String getReligion() {
-        return Religion;
+    public transient Set<Language> languages;
+    public Set<Language> getLanguages() {
+        return languages == null ? languages = DatabaseObject.doQuery("SELECT Value FROM profile_to_language WHERE UserID = ?", ID).stream()
+                .map(row -> Language.valueOf(row.get("Value").toString())).collect(Collectors.toSet()) : languages;
     }
-    public void setReligion(String val) {
-        if (!val.isEmpty()) Religion = DBE.AddSet("Religion", my.dating.app.object.enums.Religion.valueOf(val).name());
-    }
-
-    public String WouldCook;
-    public String getWouldCook() {
-        return WouldCook;
-    }
-    public void setWouldCook(String val) {
-        if (!val.isEmpty()) WouldCook = DBE.AddSet("WouldCook", LifestylePreference.valueOf(val).name());
+    public void setLanguages(Set<Language> languages) {
+        this.languages = languages;
+        DatabaseObject.doUpdate("DELETE FROM profile_to_language WHERE UserID = ?", ID);
+        for (Language I : languages)
+            DatabaseObject.doUpdate("INSERT INTO profile_to_language (UserID, Value) VALUES (?,?)", ID, I.name());
     }
 
-    public String WouldChore;
-    public String getWouldChore() {
-        return WouldChore;
+    public Double Latitude;
+    public Double Longitude;
+    public Double getLatitude() {
+        return Latitude;
     }
-    public void setWouldChore(String val) {
-        if (!val.isEmpty()) WouldChore = DBE.AddSet("WouldChore", LifestylePreference.valueOf(val).name());
+    public Double getLongitude() {
+        return Longitude;
     }
-
-    public String StatusSmoking;
-    public String getStatusSmoking() {
-        return StatusSmoking;
+    public void setLatitude(Double val) {
+        Latitude = val;
     }
-    public void setStatusSmoking(String val) {
-        if (!val.isEmpty()) StatusSmoking = DBE.AddSet("SmokingStatus", BadHabit.valueOf(val).name());
-    }
-
-    public String StatusDrinking;
-    public String getStatusDrinking() {
-        return StatusDrinking;
-    }
-    public void setStatusDrinking(String val) {
-        if (!val.isEmpty()) StatusDrinking = DBE.AddSet("StatusDrinking", BadHabit.valueOf(val).name());
+    public void setLongitude(Double val) {
+        Longitude = val;
     }
 
-    public String StatusExercise;
-    public String getStatusExercise() {
-        return StatusExercise;
+
+    public String LifestyleEducation;
+    public String getLifestyleEducation() {
+        return LifestyleEducation;
     }
-    public void setStatusExercise(String val) {
-        if (!val.isEmpty()) StatusExercise = DBE.AddSet("StatusExercise", BadHabit.valueOf(val).name());
+    public void setLifestyleEducation(String val) {
+        if (!val.isEmpty()) LifestyleEducation = val;
     }
 
-    public String Allergies;
-    public String getAllergies() {
-        return Allergies;
+    public String LifestyleOccupation;
+    public String getLifestyleOccupation() {
+        return LifestyleOccupation;
     }
-    public void setAllergies(String val) {
-        if (!val.isEmpty()) Allergies = DBE.AddSet("Allergies", val);
-    }
-
-    public String Disability;
-    public String getDisability() {
-        return Disability;
-    }
-    public void setDisability(String val) {
-        if (!val.isEmpty()) Disability = DBE.AddSet("Disability", val);
+    public void setLifestyleOccupation(String val) {
+        if (!val.isEmpty()) LifestyleOccupation = val;
     }
 
-    public boolean WantMarriage = true;
-    public boolean getWantMarriage() {
-        return WantMarriage;
+    public String LifestyleReligion;
+    public String getLifestyleReligion() {
+        return LifestyleReligion;
     }
-    public void setWantMarriage(boolean val) {
-        WantMarriage = DBE.AddSet("WantMarriage", val);
-    }
-
-    public boolean ReligionMatter = false;
-    public boolean getReligionMatter() {
-        return ReligionMatter;
-    }
-    public void setReligionMatter(boolean val) {
-        ReligionMatter = DBE.AddSet("ReligionMatter", val);
+    public void setLifestyleReligion(String val) {
+        if (!val.isEmpty()) LifestyleReligion = my.dating.app.object.enums.Religion.valueOf(val).name();
     }
 
-    public String WantKids;
-    public String getWantKids() {
-        return WantKids;
+    public String LifestyleDiet;
+    public String getLifestyleDiet() {
+        return LifestyleDiet;
     }
-    public void setWantKids(String val) {
-        if (!val.isEmpty()) WantKids = DBE.AddSet("WantKids", KidsPreference.valueOf(val).name());
-    }
-
-    public String Diet;
-    public String getDiet() {
-        return Diet;
-    }
-    public void setDiet(String val) {
-        if (!val.isEmpty()) Diet = DBE.AddSet("Diet", val);
+    public void setLifestyleDiet(String val) {
+        if (!val.isEmpty()) LifestyleDiet = Diet.valueOf(val).name();
     }
 
-    public boolean LikePets = false;
-    public boolean getLikePets() {
-        return LikePets;
+    public String LifestyleWouldCook;
+    public String getLifestyleWouldCook() {
+        return LifestyleWouldCook;
     }
-    public void setLikePets(boolean val) {
-        LikePets = DBE.AddSet("LikePets", val);
-    }
-
-    public boolean AlreadyHaveChildren = false;
-    public boolean getAlreadyHaveChildren() {
-        return AlreadyHaveChildren;
-    }
-    public void setAlreadyHaveChildren(boolean val) {
-        AlreadyHaveChildren = DBE.AddSet("AlreadyHaveChildren", val);
+    public void setLifestyleWouldCook(String val) {
+        if (!val.isEmpty()) LifestyleWouldCook = LifestylePreference.valueOf(val).name();
     }
 
-    public boolean WillingToRelocate = false;
-    public boolean getWillingToRelocate() {
-        return WillingToRelocate;
+    public String LifestyleWouldChore;
+    public String getLifestyleWouldChore() {
+        return LifestyleWouldChore;
     }
-    public void setWillingToRelocate(boolean val) {
-        WillingToRelocate = DBE.AddSet("WillingToRelocate", val);
-    }
-
-    public boolean Virgin = false;
-    public boolean getVirgin() {
-        return Virgin;
-    }
-    public void setVirgin(boolean val) {
-        Virgin = DBE.AddSet("Virgin", val);
+    public void setLifestyleWouldChore(String val) {
+        if (!val.isEmpty()) LifestyleWouldChore = LifestylePreference.valueOf(val).name();
     }
 
-    public int PastPartners = 0;
-    public int getPastPartners() {
-        return PastPartners;
+    public String LifestyleSmoking;
+    public String getLifestyleSmoking() {
+        return LifestyleSmoking;
     }
-    public void setPastPartners(int val) {
-        PastPartners = DBE.AddSet("PastPartners", Math.max(0,val));
+    public void setLifestyleSmoking(String val) {
+        if (!val.isEmpty()) LifestyleSmoking = BadHabit.valueOf(val).name();
     }
 
-    public boolean MessageRead = false;
-    public boolean getMessageRead() {
-        return MessageRead;
+    public String LifestyleDrinking;
+    public String getLifestyleDrinking() {
+        return LifestyleDrinking;
     }
-    public void setMessageRead(boolean val) {
-        MessageRead = DBE.AddSet("MessageRead", val);
+    public void setLifestyleDrinking(String val) {
+        if (!val.isEmpty()) LifestyleDrinking = BadHabit.valueOf(val).name();
+    }
+
+    public String LifestyleExercise;
+    public String getLifestyleExercise() {
+        return LifestyleExercise;
+    }
+    public void setLifestyleExercise(String val) {
+        if (!val.isEmpty()) LifestyleExercise = BadHabit.valueOf(val).name();
+    }
+
+    public String LifestyleAllergies;
+    public String getLifestyleAllergies() {
+        return LifestyleAllergies;
+    }
+    public void setLifestyleAllergies(String val) {
+        if (!val.isEmpty()) LifestyleAllergies = val;
+    }
+
+    public String LifestyleDisability;
+    public String getLifestyleDisability() {
+        return LifestyleDisability;
+    }
+    public void setLifestyleDisability(String val) {
+        if (!val.isEmpty()) LifestyleDisability = val;
+    }
+
+    public Boolean LifestylePets;
+    public Boolean getLifestylePets() {
+        return LifestylePets;
+    }
+    public void setLifestylePets(boolean val) {
+        LifestylePets = val;
+    }
+
+
+    public boolean MessageLeaveOnRead = false;
+    public boolean getMessageLeaveOnRead() {
+        return MessageLeaveOnRead;
+    }
+    public void setMessageLeaveOnRead(boolean val) {
+        MessageLeaveOnRead = val;
     }
 
     public String MessageReplySpeed;
@@ -268,59 +230,82 @@ public class Profile implements DBSaver<Profile> {
         return MessageReplySpeed;
     }
     public void setMessageReplySpeed(String val) {
-        if (!val.isEmpty()) MessageReplySpeed = DBE.AddSet("MessageReplySpeed", Rapidity.valueOf(val).name());
-    }
-
-    public double Latitude = 0;
-    public double Longitude = 0;
-    public double getLatitude() {
-        return Latitude;
-    }
-    public double getLongitude() {
-        return Longitude;
-    }
-    public void setLatitude(double val) {
-        Latitude = DBE.AddSet("Latitude", val);
-    }
-    public void setLongitude(double val) {
-        Longitude = DBE.AddSet("Longitude", val);
+        if (!val.isEmpty()) MessageReplySpeed = Rapidity.valueOf(val).name();
     }
 
 
-    public byte[] Avatar = null;
-    public void setAvatar(byte[] avatar) {
-        Avatar = DBE.AddSet("Avatar", avatar);
+    public int LovelifePastPartners = 0;
+    public int getLovelifePastPartners() {
+        return LovelifePastPartners;
     }
+    public void setLovelifePastPartners(int val) {
+        LovelifePastPartners = Math.max(0,val);
+    }
+
+    public boolean LovelifeVirginity = false;
+    public boolean getLovelifeVirginity() {
+        return LovelifeVirginity;
+    }
+    public void setLovelifeVirginity(boolean val) {
+        LovelifeVirginity = val;
+    }
+
+    public boolean LovelifeMarriage = true;
+    public boolean getLovelifeMarriage() {
+        return LovelifeMarriage;
+    }
+    public void setLovelifeMarriage(boolean val) {
+        LovelifeMarriage = val;
+    }
+
+    public boolean LovelifeReligionMatter = false;
+    public boolean getLovelifeReligionMatter() {
+        return LovelifeReligionMatter;
+    }
+    public void setLovelifeReligionMatter(boolean val) {
+        LovelifeReligionMatter = val;
+    }
+
+    public String LovelifeWantKids;
+    public String getLovelifeWantKids() {
+        return LovelifeWantKids;
+    }
+    public void setLovelifeWantKids(String val) {
+        if (!val.isEmpty()) LovelifeWantKids = KidsPreference.valueOf(val).name();
+    }
+
+    public boolean LovelifeAlreadyHaveChildren = false;
+    public boolean getLovelifeAlreadyHaveChildren() {
+        return LovelifeAlreadyHaveChildren;
+    }
+    public void setLovelifeAlreadyHaveChildren(boolean val) {
+        LovelifeAlreadyHaveChildren = val;
+    }
+
+    public boolean LovelifeWillingToRelocate = false;
+    public boolean getLovelifeWillingToRelocate() {
+        return LovelifeWillingToRelocate;
+    }
+    public void setLovelifeWillingToRelocate(boolean val) {
+        LovelifeWillingToRelocate = val;
+    }
+
 
 
     public Profile() {}
-    public Profile(long userid) throws SQLException {
+    public Profile(long userid) {
         this.ID = userid;
         Write();
     }
 
     public static Profile getById(long id) {
-        return DBM.retrieveItems(Profile.class).where("ID = ?", id).mapFirstTo(Profile.class);
+        return DatabaseObject.getById(Profile.class, id).orElse(null);
     }
 
     public List<Profile_Photo> getPhotos() {
         return photos == null ? photos = Profile_Photo.getByUser(ID) : photos;
     }
 
-    @Override
-    public int Update() throws SQLException {
-        return DBE.Update("ID = ?", ID);
-    }
-
-    @Override
-    public int Delete() throws SQLException {
-        return DBE.Delete("ID = ?", ID);
-    }
-
-    @Override
-    public Profile Write() throws SQLException {
-         return DBE.Write(false, true);
-    }
 
     public static class Profile_View extends Profile {
         public String Username;
@@ -330,14 +315,14 @@ public class Profile implements DBSaver<Profile> {
         public Profile_View() {}
 
         public static Profile_View getView(long id) {
-            return DBM.retrieveItems(Profile_View.class).where("ID = ?", id).mapFirstTo(Profile_View.class);
+            return DatabaseObject.getById(Profile_View.class, id).orElse(null);
         }
         public static Profile_View getView(String username) {
-            return DBM.retrieveItems(Profile_View.class).where("Username = ?", username).mapFirstTo(Profile_View.class);
+            return DatabaseObject.getWhere(Profile_View.class, "Username = ?", username).orElse(null);
         }
 
-        public static List<Profile_View> search(long searchId, int page) throws SQLException {
-            return DBM.processQuery("CALL MatchUsers(?,?,?);", searchId, page, 100).stream().map(row -> row.mapTo(Profile_View.class)).collect(Collectors.toList());
+        public static List<Profile_View> search(long searchId, int page) {
+            return DatabaseObject.doQueryAll(Profile_View.class,"CALL MatchUsers(?,?,?);", searchId, page, 100);
         }
     }
 
@@ -346,8 +331,8 @@ public class Profile implements DBSaver<Profile> {
 
         public Profile_Edit() {}
 
-        public static Profile_Edit getEdit(String username) throws SQLException {
-            return DBM.processQuery("CALL FetchUserdata(?,?,?);", "profile_view", "Username", username).get(0).mapTo(Profile_Edit.class);
+        public static Profile_Edit getEdit(String username) {
+            return DatabaseObject.doQuery(Profile_Edit.class,"CALL FetchUserdata(?,?,?);", "profile_view", "Username", username).orElse(null);
         }
     }
 }

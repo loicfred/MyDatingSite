@@ -2,7 +2,6 @@ package my.dating.app;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -18,16 +17,14 @@ public class ScheduledTasks {
 
     // Run every 10 minutes
     @Scheduled(fixedRate = 1000 * 60 * 10)
-    public void cleanupDrafts() {
-
-    }
+    public void each10min() {}
 
     // Run daily at midnight
     @Scheduled(cron = "0 0 0 * * ?")
-    public void recalcMatches() {
+    public void midNight() {
         System.out.println("Cleaning up " +  ClearAllFailedLogins() + " pending account creation...");
         System.out.println("Cleaning up " +  clearAllCaches() + " caches    ...");
-     }
+    }
 
     private int clearAllCaches() {
         int i = 0;

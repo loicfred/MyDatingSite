@@ -1,16 +1,11 @@
 package my.dating.app.object.msg;
 
-import my.utilities.db.DBSaver;
-import my.utilities.db.DatabaseEditor;
+import my.dating.app.service.DatabaseObject;
 
-import java.sql.SQLException;
 import java.time.Instant;
 import java.util.List;
 
-import static my.dating.app.MyDatingSiteApplication.DBM;
-
-public class Message_Reaction implements DBSaver<Message_Reaction> {
-    private final transient DatabaseEditor<Message_Reaction> DBE = new DatabaseEditor<>(DBM,this, Message_Reaction.class);
+public class Message_Reaction extends DatabaseObject<Message_Reaction> {
 
     public long ID = Instant.now().toEpochMilli();
     public long MessageID;
@@ -18,7 +13,7 @@ public class Message_Reaction implements DBSaver<Message_Reaction> {
     public String Emoji;
 
     public Message_Reaction() {}
-    public Message_Reaction(long userID, long messageID, String emoji) throws SQLException {
+    public Message_Reaction(long userID, long messageID, String emoji) {
         MessageID = messageID;
         UserID = userID;
         Emoji = emoji;
@@ -39,25 +34,10 @@ public class Message_Reaction implements DBSaver<Message_Reaction> {
     }
 
     public static Message_Reaction getById(long id) {
-        return DBM.retrieveItems(Message_Reaction.class).where("ID = ?", id).mapFirstTo(Message_Reaction.class);
+        return DatabaseObject.getById(Message_Reaction.class, id).orElse(null);
     }
     public static Message_Reaction get(long userid, long messageid, String emoji) {
-        return DBM.retrieveItems(Message_Reaction.class).where("UserID = ? AND MessageID = ? AND Emoji = ?", userid, messageid, emoji).mapFirstTo(Message_Reaction.class);
-    }
-
-    @Override
-    public int Update() throws SQLException {
-        return DBE.Update("ID = ?", ID);
-    }
-
-    @Override
-    public int Delete() throws SQLException {
-        return DBE.Delete("ID = ?", ID);
-    }
-
-    @Override
-    public Message_Reaction Write() throws SQLException {
-        return DBE.Write(true, true);
+        return DatabaseObject.getWhere(Message_Reaction.class, "UserID = ? AND MessageID = ? AND Emoji = ?", userid, messageid, emoji).orElse(null);
     }
 
     public static class Message_Reaction_View extends Message_Reaction {
@@ -66,7 +46,7 @@ public class Message_Reaction implements DBSaver<Message_Reaction> {
         public Message_Reaction_View() {}
 
         public static List<Message_Reaction_View> getByMessage(long messageID) {
-            return DBM.retrieveItems(Message_Reaction_View.class).where("MessageID = ?", messageID).mapAllTo(Message_Reaction_View.class);
+            return DatabaseObject.getAllWhere(Message_Reaction_View.class, "MessageID = ?", messageID);
         }
 
         public long getCount() {

@@ -1,17 +1,12 @@
 package my.dating.app.object.msg;
 
 import my.dating.app.object.msg.attachment.Draft_Attachment;
-import my.utilities.db.DBSaver;
-import my.utilities.db.DatabaseEditor;
+import my.dating.app.service.DatabaseObject;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static my.dating.app.MyDatingSiteApplication.DBM;
-
-public class Draft extends BaseMessage implements DBSaver<Draft> {
-    private final transient DatabaseEditor<Draft> DBE = new DatabaseEditor<>(DBM,this, Draft.class);
+public class Draft extends BaseMessage<Draft> {
     private transient List<Draft_Attachment> attachments;
 
     public Draft() {}
@@ -20,11 +15,12 @@ public class Draft extends BaseMessage implements DBSaver<Draft> {
     }
 
     public static Draft getById(long id) {
-        return DBM.retrieveItems(Draft.class).where("ID = ?", id).mapFirstTo(Draft.class);
+        return DatabaseObject.getById(Draft.class, id).orElse(null);
     }
     public static Draft get(long chatid, long userid) {
-        return DBM.retrieveItems(Draft.class).where("ChatID = ? AND UserID = ?", chatid, userid).mapFirstTo(Draft.class);
+        return DatabaseObject.getWhere(Draft.class, "ChatID = ? AND UserID = ?", chatid, userid).orElse(null);
     }
+
     public List<Draft_Attachment> getAttachments() {
         return attachments == null ? attachments = Draft_Attachment.getByDraft(ID) : attachments;
     }
@@ -33,22 +29,7 @@ public class Draft extends BaseMessage implements DBSaver<Draft> {
         attachments.addAll(List.of(attachment));
     }
     public int ClearAttachments() {
-        return DBM.deleteItems(Draft_Attachment.class).where("MessageID = ?", ID).delete();
+        return DatabaseObject.doUpdate("DELETE FROM draft_attachment WHERE MessageID = ?", ID);
     }
 
-
-    @Override
-    public int Update() throws SQLException {
-        return DBE.Update("ID = ?", ID);
-    }
-
-    @Override
-    public int Delete() throws SQLException {
-        return DBE.Delete("ID = ?", ID);
-    }
-
-    @Override
-    public Draft Write() throws SQLException {
-        return DBE.Write(true, true);
-    }
 }

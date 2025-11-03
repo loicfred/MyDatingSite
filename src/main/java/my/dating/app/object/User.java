@@ -1,15 +1,10 @@
 package my.dating.app.object;
 
-import my.utilities.db.DBSaver;
-import my.utilities.db.DatabaseEditor;
+import my.dating.app.service.DatabaseObject;
 
-import java.sql.SQLException;
 import java.time.Instant;
 
-import static my.dating.app.MyDatingSiteApplication.DBM;
-
-public class User implements DBSaver<User> {
-    public final transient DatabaseEditor<User> DBE = new DatabaseEditor<>(DBM,this, User.class);
+public class User extends DatabaseObject<User> {
     public transient Profile P;
 
     public long ID;
@@ -21,7 +16,7 @@ public class User implements DBSaver<User> {
     public User() {
         this.ID = Instant.now().toEpochMilli();
     }
-    public User(String username, String email, String password) throws SQLException {
+    public User(String username, String email, String password) {
         this.ID = Instant.now().toEpochMilli();
         this.Username = username;
         this.Email = email;
@@ -30,30 +25,30 @@ public class User implements DBSaver<User> {
     }
 
     public static User getById(long id) {
-        return DBM.retrieveItems(User.class).where("ID = ?", id).mapFirstTo(User.class);
+        return DatabaseObject.getById(User.class, id).orElse(null);
     }
 
     public static User getByUsername(String username) {
-        return DBM.retrieveItems(User.class).where("Username = ?", username).mapFirstTo(User.class);
+        return DatabaseObject.getWhere(User.class, "Username = ?", username).orElse(null);
     }
 
     public static User getByEmail(String email) {
-        return DBM.retrieveItems(User.class).where("Email = ?", email).mapFirstTo(User.class);
+        return DatabaseObject.getWhere(User.class, "Email = ?", email).orElse(null);
     }
 
     public static User getByLogin(String username, String password) {
-        return DBM.retrieveItems(User.class).where("(Username = ? OR Email = ?) AND Password = ?", username, username, password).mapFirstTo(User.class);
+        return DatabaseObject.getWhere(User.class, "(Username = ? OR Email = ?) AND Password = ?", username, username, password).orElse(null);
     }
 
-    public static void ClearFailedLogins(String username, String email) throws SQLException {
-        User U = DBM.retrieveItems(User.class).where("Username = ? AND Enabled = ?", username, false).mapFirstTo(User.class);
+    public static void ClearFailedLogins(String username, String email) {
+        User U = DatabaseObject.getWhere(User.class, "Username = ? OR Enabled = ?", username, false).orElse(null);
         if (U != null) U.Delete();
-        U = DBM.retrieveItems(User.class).where("Email = ? AND Enabled = ?", email, false).mapFirstTo(User.class);
+        U = DatabaseObject.getWhere(User.class, "Email = ? OR Enabled = ?", email, false).orElse(null);
         if (U != null) U.Delete();
     }
 
     public static int ClearAllFailedLogins() {
-        return DBM.deleteItems(User.class).where("Enabled = ?", false).delete();
+        return DatabaseObject.doUpdate("DELETE user WHERE Enabled = ?", false);
     }
 
     public long getId() {
@@ -72,35 +67,22 @@ public class User implements DBSaver<User> {
         return Enabled;
     }
 
-    public Profile getProfile() throws SQLException {
-        return P == null ? P = Profile.getById(ID) : P;
-    }
-
     public void setUsername(String username) {
-        Username = DBE.AddSet("Username", username);
+        Username = username;
     }
     public void setPassword(String password) {
-        Password = DBE.AddSet("Password", password);
+        Password = password;
     }
     public void setEmail(String email) {
-        Email = DBE.AddSet("Email", email);
+        Email = email;
     }
     public void setEnabled(boolean enabled) {
-        Enabled = DBE.AddSet("Enabled", enabled);
+        Enabled = enabled;
     }
 
-    @Override
-    public int Update() throws SQLException {
-        return DBE.Update("ID = ?", ID);
-    }
 
-    @Override
-    public int Delete() throws SQLException {
-        return DBE.Delete("ID = ?", ID);
-    }
 
-    @Override
-    public User Write() throws SQLException {
-         return DBE.Write(false, false);
+    public Profile getProfile() {
+        return P == null ? P = Profile.getById(ID) : P;
     }
 }

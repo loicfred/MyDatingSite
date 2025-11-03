@@ -1,18 +1,13 @@
-package my.dating.app.object;
+package my.dating.app.object.chatting;
 
+import my.dating.app.object.User;
 import my.dating.app.object.msg.Message;
-import my.utilities.db.DBSaver;
-import my.utilities.db.DatabaseEditor;
-import my.utilities.db.QueryParameter;
+import my.dating.app.service.DatabaseObject;
 
-import java.sql.SQLException;
 import java.time.Instant;
 import java.util.List;
 
-import static my.dating.app.MyDatingSiteApplication.DBM;
-
-public class Chat implements DBSaver<Chat> {
-    public final transient DatabaseEditor<Chat> DBE = new DatabaseEditor<>(DBM,this, Chat.class);
+public class Chat extends DatabaseObject<Chat> {
     private transient List<Message.Message_View> Messages;
 
     public long ID;
@@ -20,7 +15,7 @@ public class Chat implements DBSaver<Chat> {
     public long UserID2;
 
     public Chat() {}
-    public Chat(User user, User user2) throws SQLException {
+    public Chat(User user, User user2) {
         this.ID = Instant.now().toEpochMilli();
         this.UserID1 = user.ID;
         this.UserID2 = user2.ID;
@@ -28,32 +23,17 @@ public class Chat implements DBSaver<Chat> {
     }
 
     public static Chat getById(long id) {
-        return DBM.retrieveItems(Chat.class).where("ID = ?", id).mapFirstTo(Chat.class);
+        return DatabaseObject.getById(Chat.class, id).orElse(null);
     }
-    public List<Message.Message_View> getMessages(String... select) {
-        return Messages == null ? Messages = Message.Message_View.getByChat(ID, select) : Messages;
+    public List<Message.Message_View> getMessages() {
+        return Messages == null ? Messages = Message.Message_View.getByChat(ID) : Messages;
     }
 
     public void readAllMessages(long userid) {
-        DBM.updateItems(Message.class).set(new QueryParameter("isRead", true)).where("ChatID = ? AND UserID = ?", ID, userid).update();
+        DatabaseObject.doUpdate("UPDATE message SET isRead = ? WHERE ChatID = ? AND UserID = ?", true, ID, userid);
     }
 
-    @Override
-    public int Update() throws SQLException {
-        return DBE.Update("ID = ?", ID);
-    }
-
-    @Override
-    public int Delete() throws SQLException {
-        return DBE.Delete("ID = ?", ID);
-    }
-
-    @Override
-    public Chat Write() throws SQLException {
-         return DBE.Write(false, true);
-    }
-
-    public static class Latest_Chat extends Chat {
+    public static class Chatlist_Item extends Chat {
 
         public Long LatestMessageID;
         public Long SenderID;
@@ -65,11 +45,11 @@ public class Chat implements DBSaver<Chat> {
 
         public Long Unreads;
 
-        public static List<Latest_Chat> getWithUser(long userid) {
-            return DBM.retrieveItems(Latest_Chat.class).where("(UserID1 = ? OR UserID2 = ?) AND NOT PartnerID = ?", userid, userid, userid).mapAllTo(Latest_Chat.class);
+        public static List<Chatlist_Item> getWithUser(long userid) {
+            return DatabaseObject.getAllWhere(Chatlist_Item.class, "(UserID1 = ? OR UserID2 = ?) AND NOT PartnerID = ?", userid, userid, userid);
         }
-        public static Latest_Chat find(long chatid, String username) {
-            return DBM.retrieveItems(Latest_Chat.class).where("ID = ? AND NOT PartnerUsername = ?", chatid, username).mapFirstTo(Latest_Chat.class);
+        public static Chatlist_Item find(long chatid, String username) {
+            return DatabaseObject.getWhere(Chatlist_Item.class, "ID = ? AND NOT PartnerUsername = ?", chatid, username).orElse(null);
         }
 
         public Long getLatestMessageID() {

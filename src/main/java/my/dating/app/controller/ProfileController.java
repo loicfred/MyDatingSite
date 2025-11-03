@@ -16,7 +16,7 @@ import java.sql.SQLException;
 public class ProfileController {
 
     @GetMapping("/profile/{username}")
-    public String profile(@PathVariable String username, Model model, Principal loggedUser) throws SQLException {
+    public String profile(@PathVariable String username, Model model, Principal loggedUser) {
         model.addAttribute("principal", loggedUser);
         Profile.Profile_View profile = Profile.Profile_View.getView(username);
         while (profile.getPhotos().size() < 20) profile.getPhotos().add(new Profile_Photo());
@@ -26,7 +26,7 @@ public class ProfileController {
     }
 
     @GetMapping("/profile/edit")
-    public String editProfile(Model model, Principal loggedUser) throws SQLException {
+    public String editProfile(Model model, Principal loggedUser) {
         model.addAttribute("principal", loggedUser);
         model.addAttribute("profile", Profile.Profile_Edit.getEdit(loggedUser.getName()));
         return "profile/edit";

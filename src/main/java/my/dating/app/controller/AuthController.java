@@ -34,7 +34,7 @@ public class AuthController {
         return "accounts/signup";
     }
     @GetMapping("/accounts/verify")
-    public String verifyAccount(@RequestParam("token") String token, Model model) throws SQLException {
+    public String verifyAccount(@RequestParam("token") String token, Model model) {
         model.addAttribute("isAnonymous", SecurityContextHolder.getContext().getAuthentication() instanceof AnonymousAuthenticationToken);
         Email_Verification vToken = Email_Verification.getByToken(token);
         if (vToken == null) {
@@ -57,7 +57,7 @@ public class AuthController {
 
 
     @PostMapping("/post/accounts/register")
-    public String register(User user) throws SQLException {
+    public String register(User user) {
         User.ClearFailedLogins(user.Username, user.Email);
         user.Password = passwordEncoder.encode(user.Password);
         user.Write();
